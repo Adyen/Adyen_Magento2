@@ -19,8 +19,7 @@ use Magento\Sales\Model\Order;
 
 class ChannelDataBuilder implements BuilderInterface
 {
-    /** @var StateData */
-    private $stateDataHelper;
+    private StateData $stateDataHelper;
 
     public function __construct(StateData $stateDataHelper)
     {
@@ -29,15 +28,13 @@ class ChannelDataBuilder implements BuilderInterface
 
     public function build(array $buildSubject): array
     {
-        /** @var PaymentDataObject $paymentDataObject */
-        $paymentDataObject = SubjectReader::readPayment($buildSubject);
-        $payment = $paymentDataObject->getPayment();
-        /** @var Order $order */
-        $order = $payment->getOrder();
+        $order = SubjectReader::readPayment($buildSubject)->getPayment()->getOrder();
+        $stateData = $order->getQuoteId() ? $this->stateDataHelper->getStateData((int)$order->getQuoteId()) : [];
 
-        $stateData = $this->stateDataHelper->getStateData($order->getQuoteId());
-        $request['body']['channel'] = array_key_exists('channel', $stateData) ? $stateData['channel'] : 'web';
-
-        return $request;
+        return [
+            'body' => [
+                'channel' => $stateData['channel'] ?? 'web'
+            ]
+        ];
     }
 }

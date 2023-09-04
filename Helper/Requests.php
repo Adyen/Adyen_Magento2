@@ -353,11 +353,14 @@ class Requests extends AbstractHelper
         }
 
         $storePaymentMethod = false;
+        $order = $payment->getOrder();
 
         // Initialize the request body with the current state data
         // Multishipping checkout uses the cc_number field for state data
-        $stateData = $this->stateData->getStateData($payment->getOrder()->getQuoteId()) ?:
-            (json_decode($payment->getCcNumber(), true) ?: []);
+        $stateData = $order->getQuoteId() ? $this->stateData->getStateData((int)$order->getQuoteId()) : [];
+        if (!$stateData) {
+            $stateData = json_decode($payment->getCcNumber(), true) ?: [];
+        }
 
         // If PayByLink
         // Else, if option to store token exists, get the value from the checkbox

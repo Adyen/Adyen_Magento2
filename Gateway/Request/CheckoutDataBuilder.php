@@ -34,42 +34,18 @@ class CheckoutDataBuilder implements BuilderInterface
         AdyenBoletoConfigProvider::CODE
     ];
 
-    /**
-     * @var Data
-     */
-    private $adyenHelper;
+    private Data $adyenHelper;
 
-    /**
-     * @var CartRepositoryInterface
-     */
-    private $cartRepository;
+    private CartRepositoryInterface $cartRepository;
 
-    /**
-     * @var ChargedCurrency
-     */
-    private $chargedCurrency;
+    private ChargedCurrency $chargedCurrency;
 
-    /**
-     * @var Image
-     */
-    private $imageHelper;
-    /**
-     * @var StateData
-     */
-    private $stateData;
+    private Image $imageHelper;
 
-    /** @var Config */
-    private $configHelper;
+    private StateData $stateData;
 
-    /**
-     * CheckoutDataBuilder constructor.
-     * @param Data $adyenHelper
-     * @param StateData $stateData
-     * @param CartRepositoryInterface $cartRepository
-     * @param ChargedCurrency $chargedCurrency
-     * @param Image $imageHelper
-     * @param Config $configHelper
-     */
+    private Config $configHelper;
+
     public function __construct(
         Data $adyenHelper,
         StateData $stateData,
@@ -102,9 +78,9 @@ class CheckoutDataBuilder implements BuilderInterface
 
         // Initialize the request body with the current state data
         // Multishipping checkout uses the cc_number field for state data
-        $requestBody = $this->stateData->getStateData($order->getQuoteId());
+        $requestBody = $order->getQuoteId() ? $this->stateData->getStateData((int)$order->getQuoteId()) : [];
 
-        if (empty($requestBody) && !is_null($payment->getCcNumber())) {
+        if (!$requestBody && $payment->getCcNumber() !== null) {
             $requestBody = json_decode($payment->getCcNumber(), true);
         }
 

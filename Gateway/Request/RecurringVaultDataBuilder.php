@@ -48,7 +48,7 @@ class RecurringVaultDataBuilder implements BuilderInterface
         $details = json_decode($paymentToken->getTokenDetails() ?: '{}', true);
 
         // Initialize the request body with the current state data
-        $requestBody = $this->stateData->getStateData($order->getQuoteId());
+        $requestBody = $order->getQuoteId() ? $this->stateData->getStateData((int)$order->getQuoteId()) : [];
 
         // For now this will only be used by tokens created trough adyen_hpp payment methods
         if (array_key_exists(Vault::TOKEN_TYPE, $details)) {
