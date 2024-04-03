@@ -20,7 +20,6 @@ use Adyen\Payment\Model\Ui\Adminhtml\AdyenMotoConfigProvider;
 use Adyen\Payment\Model\Ui\AdyenPayByLinkConfigProvider;
 use Adyen\Payment\Model\Ui\AdyenPosCloudConfigProvider;
 use Adyen\Util\ManualCapture;
-use Exception;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -42,6 +41,8 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use Magento\Vault\Api\PaymentTokenRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Adyen\Payment\Helper\Api\PaymentMethods as ApiPaymentMethods;
+
 class PaymentMethods extends AbstractHelper
 {
     const ADYEN_HPP = 'adyen_hpp';
@@ -89,6 +90,7 @@ class PaymentMethods extends AbstractHelper
     private SerializerInterface $serializer;
     private PaymentTokenRepositoryInterface $paymentTokenRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
+    protected ApiPaymentMethods $apiPaymentMethods;
 
     public function __construct(
         Context $context,
@@ -109,7 +111,8 @@ class PaymentMethods extends AbstractHelper
         SerializerInterface $serializer,
         AdyenDataHelper $adyenDataHelper,
         PaymentTokenRepositoryInterface $paymentTokenRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        ApiPaymentMethods $apiPaymentMethods
     ) {
         parent::__construct($context);
         $this->quoteRepository = $quoteRepository;
@@ -130,6 +133,7 @@ class PaymentMethods extends AbstractHelper
         $this->adyenDataHelper = $adyenDataHelper;
         $this->paymentTokenRepository = $paymentTokenRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->apiPaymentMethods = $apiPaymentMethods;
     }
 
     public function getPaymentMethods(int $quoteId, ?string $country = null, ?string $shopperLocale = null): string
@@ -199,7 +203,7 @@ class PaymentMethods extends AbstractHelper
         }
 
         $requestData = $this->getPaymentMethodsRequest($merchantAccount, $store, $quote, $shopperLocale, $country);
-        $responseData = $this->getPaymentMethodsResponse($requestData, $store);
+        $responseData = $this->apiPaymentMethods->getPaymentMethods($requestData, $store);
         if (empty($responseData['paymentMethods'])) {
             return json_encode([]);
         }
@@ -297,35 +301,6 @@ class PaymentMethods extends AbstractHelper
         }
 
         return "";
-    }
-
-    protected function getPaymentMethodsResponse(array $requestParams, Store $store): array
-    {
-        // initialize the adyen client
-        $client = $this->adyenHelper->initializeAdyenClient($store->getId());
-
-        // initialize service
-        $service = $this->adyenHelper->createAdyenCheckoutService($client);
-
-        try {
-            $this->adyenHelper->logRequest($requestParams, Client::API_CHECKOUT_VERSION, '/paymentMethods');
-            $responseData = $service->paymentMethods($requestParams);
-        } catch (AdyenException $e) {
-            $this->adyenLogger->error(
-                "The Payment methods response is empty check your Adyen configuration in Magento."
-            );
-            // return empty result
-            return [];
-        }
-        catch (ConnectionException $e) {
-            $this->adyenLogger->error(
-                "Connection to the endpoint failed. Check the Adyen Live endpoint prefix configuration."
-            );
-            return [];
-        }
-        $this->adyenHelper->logResponse($responseData);
-
-        return $responseData;
     }
 
     protected function getQuote(): \Magento\Quote\Model\Quote
