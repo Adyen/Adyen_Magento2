@@ -1,7 +1,7 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}-apache
 LABEL maintainer="Adyen <magento@adyen.com>"
-
+# Sample setup for CI pipeline. Not meant for use this in Production
 ENV MAGENTO_HOST="<will be defined>" \
 DB_SERVER="<will be defined>" \
 DB_PORT=3306 \
