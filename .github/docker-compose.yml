@@ -6,7 +6,7 @@ services:
     container_name: mariadb
     networks:
       - backend
-    environment:
+    environment: # Sample setup for CI pipeline. Not meant for use this in Production
       MARIADB_ROOT_PASSWORD: root_password
       MARIADB_DATABASE: magento
       MARIADB_USER: magento
