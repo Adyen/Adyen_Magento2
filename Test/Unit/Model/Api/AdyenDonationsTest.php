@@ -15,6 +15,7 @@ use Adyen\Payment\Helper\ChargedCurrency;
 use Adyen\Payment\Helper\Config;
 use Adyen\Payment\Helper\Data;
 use Adyen\Payment\Helper\PaymentMethods;
+use Adyen\Payment\Helper\Requests;
 use Adyen\Payment\Model\Api\AdyenDonations;
 use Adyen\Payment\Model\Sales\OrderRepository;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
@@ -48,7 +49,8 @@ class AdyenDonationsTest extends AbstractAdyenTestCase
                 $this->createMock(ChargedCurrency::class),
                 $this->createMock(Config::class),
                 $this->createMock(PaymentMethods::class),
-                $orderRepositoryMock
+                $orderRepositoryMock,
+                $this->createMock(Requests::class)
             ])
             ->getMock();
 

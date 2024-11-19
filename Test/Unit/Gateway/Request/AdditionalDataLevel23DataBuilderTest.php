@@ -181,6 +181,53 @@ class AdditionalDataLevel23DataBuilderTest extends AbstractAdyenTestCase
         $this->assertEquals($expectedResult, $result);
     }
 
+    public function testVirtualOrderGuest()
+    {
+        $storeId = 1;
+        $orderShopperReference = 123;
+        $currencyCode = 'USD';
+        $customerId = null;
+        $orderIncrementId = '000000123';
+        $shopperReference = 'guest-cart-123';
+        $taxAmount = 10.00;
+        $formattedTaxAmount = '1000';
+
+        $this->storeMock->method('getId')->willReturn($storeId);
+        $this->configMock->method('sendLevel23AdditionalData')->with($storeId)->willReturn(true);
+        $this->chargedCurrencyMock->method('getOrderAmountCurrency')->willReturn(new AdyenAmountCurrency(null, $currencyCode));
+        $this->adyenHelperMock->method('formatAmount')->willReturn($formattedTaxAmount);
+        $this->adyenRequestHelperMock->method('getShopperReference')->with(null, $orderIncrementId, $orderShopperReference)->willReturn($shopperReference);
+
+        $orderMock = $this->createConfiguredMock(Order::class, [
+            'getCustomerId' => $customerId,
+            'getIncrementId' => $orderIncrementId,
+            'getTaxAmount' => $taxAmount,
+            'getItems' => [],
+            'getIsNotVirtual' => false,
+            'getShippingAddress' => null,
+            'getBaseShippingAmount' => 0.00,
+        ]);
+
+        $orderAdapterMock = $this->createMock(OrderAdapterInterface::class);
+        $paymentMock = $this->createMock(Payment::class);
+        $paymentMock->method('getOrder')->willReturn($orderMock);
+        $paymentMock->method('getAdditionalInformation')->willReturn($orderShopperReference);
+        $paymentDataObject = new PaymentDataObject($orderAdapterMock, $paymentMock);
+        $buildSubject = ['payment' => $paymentDataObject, 'order' => $orderMock];
+        $result = $this->additionalDataBuilder->build($buildSubject);
+
+        $expectedResult = [
+            'body' => [
+                'additionalData' => [
+                    'enhancedSchemeData.totalTaxAmount' => '1000',
+                    'enhancedSchemeData.customerReference' => $shopperReference
+                ]
+            ]
+        ];
+
+        $this->assertEquals($expectedResult, $result);
+    }
+
     public function testNonVirtualOrder()
     {
         $storeId = 1;

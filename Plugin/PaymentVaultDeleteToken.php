@@ -124,7 +124,7 @@ class PaymentVaultDeleteToken
                 $paymentToken->getPaymentMethodCode()
             ),
             Requests::SHOPPER_REFERENCE =>
-                $this->requestsHelper->getShopperReference($paymentToken->getCustomerId(), null),
+                $this->requestsHelper->getShopperReference($paymentToken->getCustomerId(), null, null),
             Requests::RECURRING_DETAIL_REFERENCE => $paymentToken->getGatewayToken()
         ];
     }

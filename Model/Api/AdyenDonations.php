@@ -20,6 +20,7 @@ use Adyen\Payment\Helper\PaymentMethods;
 use Adyen\Payment\Model\Sales\OrderRepository;
 use Adyen\Payment\Model\Ui\AdyenCcConfigProvider;
 use Adyen\Util\Uuid;
+use Adyen\Payment\Helper\Requests;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -37,6 +38,7 @@ class AdyenDonations implements AdyenDonationsInterface
     private Config $config;
     private PaymentMethods $paymentMethodsHelper;
     private OrderRepository $orderRepository;
+    private Requests $adyenRequestsHelper;
 
     private $donationTryCount;
 
@@ -47,7 +49,8 @@ class AdyenDonations implements AdyenDonationsInterface
         ChargedCurrency $chargedCurrency,
         Config $config,
         PaymentMethods $paymentMethodsHelper,
-        OrderRepository $orderRepository
+        OrderRepository $orderRepository,
+        Requests $adyenRequestsHelper
     ) {
         $this->commandPool = $commandPool;
         $this->jsonSerializer = $jsonSerializer;
@@ -56,6 +59,7 @@ class AdyenDonations implements AdyenDonationsInterface
         $this->config = $config;
         $this->paymentMethodsHelper = $paymentMethodsHelper;
         $this->orderRepository = $orderRepository;
+        $this->adyenRequestsHelper = $adyenRequestsHelper;
     }
 
     /**
@@ -111,14 +115,9 @@ class AdyenDonations implements AdyenDonationsInterface
         } else {
             throw new LocalizedException(__('Donation failed!'));
         }
-
+        $payment = $order->getPayment();
+        $request['shopperReference'] = $this->adyenRequestsHelper->getShopperReference($customerId, $payment->getOrder()->getIncrementId(), $payment->getAdditionalInformation('shopperReference'));
         $customerId = $order->getCustomerId();
-        if ($customerId) {
-            $payload['shopperReference'] = $this->dataHelper->padShopperReference($customerId);
-        } else {
-            $guestCustomerId = $order->getIncrementId() . Uuid::generateV4();
-            $payload['shopperReference'] = $guestCustomerId;
-        }
 
         try {
             $donationsCaptureCommand = $this->commandPool->get('capture');
