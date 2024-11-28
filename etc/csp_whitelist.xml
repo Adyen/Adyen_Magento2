@@ -8,39 +8,37 @@
                 <value id="amazonpay" type="host">*.payments-amazon.com</value>
                 <value id="paypal" type="host">*.paypal.com</value>
                 <value id="ratepay" type="host">*.ratepay.com</value>
+                <value id="cashapppay" type="host">*.cash.app</value>
+            </values>
+        </policy>
+        <policy id="font-src">
+            <values>
+                <value id="cashapppay" type="host">cash-f.squarecdn.com</value>
+            </values>
+        </policy>
+        <policy id="style-src">
+            <values>
+                <value id="cashapppay" type="host">*.cash.app</value>
             </values>
         </policy>
         <policy id="frame-src">
             <values>
-                <value id="adyen" type="host">*.adyen.com</value>
-                <value id="googlepay" type="host">pay.google.com</value>
-                <value id="paypal" type="host">*.paypal.com</value>
+                <value id="allow_all" type="host">*</value>
             </values>
         </policy>
         <policy id="img-src">
             <values>
-                <value id="adyen" type="host">*.adyen.com</value>
-                <value id="googlepay" type="host">pay.google.com</value>
-                <value id="amazonpay" type="host">*.payments-amazon.com</value>
-                <value id="amazonpay-media" type="host">*.media-amazon.com</value>
-                <value id="paypal-objects" type="host">*.paypalobjects.com</value>
+                <value id="allow_all" type="host">*</value>
             </values>
         </policy>
         <policy id="connect-src">
             <values>
-                <value id="adyen" type="host">*.adyen.com</value>
-                <value id="google-wc" type="host">*.google.com</value>
-                <value id="google" type="host">google.com</value>
-                <value id="amazonpay" type="host">payments-eu.amazon.com</value>
-                <value id="paypal" type="host">*.paypal.com</value>
+                <value id="allow_all" type="host">*</value>
             </values>
         </policy>
         <policy id="form-action">
             <values>
-                <value id="adyen" type="host">*.adyen.com</value>
-                <value id="googlepay" type="host">pay.google.com</value>
-                <value id="amazonpay-eu" type="host">payments-eu.amazon.com</value>
-                <value id="amazonpay-de" type="host">*.amazon.de</value>
+                <value id="allow_all" type="host">*</value>
             </values>
         </policy>
     </policies>
