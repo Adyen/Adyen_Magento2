@@ -9,6 +9,10 @@ use Magento\Framework\Registry;
 
 class NotificationTest extends AbstractAdyenTestCase
 {
+    private Context $contextMock;
+    private Registry $registryMock;
+    private Notification $notification;
+
     protected function setUp(): void
     {
         $this->contextMock = $this->getMockBuilder(Context::class)

@@ -16,35 +16,23 @@ namespace Adyen\Payment\Model\Resolver;
 use Adyen\Payment\Exception\GraphQlAdyenException;
 use Adyen\Payment\Model\Api\AdyenStateData;
 use Exception;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class SaveAdyenStateData implements ResolverInterface
 {
     /**
-     * @var AdyenStateData
-     */
-    private AdyenStateData $adyenStateData;
-
-    /**
-     * @var QuoteIdMaskFactory
-     */
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
-    /**
      * @param AdyenStateData $adyenStateData
-     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
      */
     public function __construct(
-        AdyenStateData $adyenStateData,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->adyenStateData = $adyenStateData;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        private readonly AdyenStateData $adyenStateData,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param Field $field
@@ -55,6 +43,7 @@ class SaveAdyenStateData implements ResolverInterface
      * @return array
      * @throws GraphQlAdyenException
      * @throws GraphQlInputException
+     * @throws NoSuchEntityException
      */
     public function resolve(
         Field $field,
@@ -71,11 +60,10 @@ class SaveAdyenStateData implements ResolverInterface
             throw new GraphQlInputException(__('Required parameter "cartId" is missing'));
         }
 
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($args['cartId'], 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($args['cartId']);
 
         try {
-            $stateDataId = $this->adyenStateData->save($args['stateData'], (int) $quoteId);
+            $stateDataId = $this->adyenStateData->save($args['stateData'], $quoteId);
         } catch (Exception $e) {
             throw new GraphQlAdyenException(__('An error occurred while saving the state data.'), $e);
         }
@@ -83,5 +71,3 @@ class SaveAdyenStateData implements ResolverInterface
         return ['stateDataId' => $stateDataId];
     }
 }
-
-

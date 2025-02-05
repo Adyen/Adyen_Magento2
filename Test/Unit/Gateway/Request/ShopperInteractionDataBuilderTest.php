@@ -20,31 +20,31 @@ use Adyen\Payment\Model\Ui\AdyenPayByLinkConfigProvider;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Framework\Model\Context;
 use Magento\Payment\Gateway\Data\PaymentDataObject;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class ShopperInteractionDataBuilderTest extends AbstractAdyenTestCase
 {
-    private $shopperInteractionDataBuilder;
-    private $appState;
-    private $stateData;
+    private ShopperInteractionDataBuilder $shopperInteractionDataBuilder;
+    private State|MockObject $appState;
+    private StateData|MockObject $stateData;
+    private Context|MockObject $contextMock;
 
     protected function setUp(): void
     {
-        $this->objectManager = new ObjectManager($this);
-
         $this->appState = $this->createMock(State::class);
         $this->stateData = $this->createPartialMock(StateData::class, [
             'getStateData'
         ]);
+        $this->contextMock = $this->createMock(Context::class);
+        $this->contextMock->method('getAppState')->willReturn($this->appState);
 
-        $this->shopperInteractionDataBuilder = $this->objectManager->getObject(
-            ShopperInteractionDataBuilder::class, [
-                'appState' => $this->appState,
-                'stateData' => $this->stateData
-            ]
+        $this->shopperInteractionDataBuilder = new ShopperInteractionDataBuilder(
+            $this->contextMock,
+            $this->stateData
         );
     }
 

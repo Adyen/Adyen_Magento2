@@ -19,35 +19,28 @@ use Magento\Payment\Gateway\Request\BuilderInterface;
 class ExpiryDateDataBuilder implements BuilderInterface
 {
     /**
-     * @var RequestInterface
-     */
-    private $request;
-
-    /**
      * @param RequestInterface $request
      */
     public function __construct(
-        RequestInterface $request
+        private readonly RequestInterface $request
     )
-    {
-        $this->request = $request;
-    }
+    { }
 
     /**
-     * Add delivery\billing details into request
+     * Add Pay by Link expiry date to the request
      *
      * @param array $buildSubject
      * @return array
      */
-    public function build(array $buildSubject)
+    public function build(array $buildSubject): array
     {
         $expiryDate = null;
+        $request = [];
         $paymentFormFields = $this->request->getParam('payment');
-        $paymentExpiryDate = $buildSubject['payment']->getPayment()->getAdditionalInformation()
-        [AdyenPayByLinkDataAssignObserver::PBL_EXPIRY_DATE];
+        $payment = $buildSubject['payment']->getPayment();
+        $paymentExpiryDate = $payment->getAdditionalInformation(AdyenPayByLinkDataAssignObserver::PBL_EXPIRY_DATE);
 
-        if (isset($paymentFormFields) && isset($paymentFormFields
-                [AdyenPayByLinkDataAssignObserver::PBL_EXPIRY_DATE])) {
+        if (isset($paymentFormFields[AdyenPayByLinkDataAssignObserver::PBL_EXPIRY_DATE])) {
             $expiryDate = $paymentFormFields[AdyenPayByLinkDataAssignObserver::PBL_EXPIRY_DATE];
         } elseif (isset($paymentExpiryDate)) {
             $expiryDate = $paymentExpiryDate;
@@ -60,7 +53,8 @@ class ExpiryDateDataBuilder implements BuilderInterface
             );
 
             $request['body']['expiresAt'] = $expiryDateTime->format(DATE_ATOM);
-            return $request;
         }
+
+        return $request;
     }
 }

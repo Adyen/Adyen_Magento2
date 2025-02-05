@@ -16,7 +16,6 @@ use Adyen\Payment\Helper\Data;
 use Adyen\Payment\Helper\Config;
 use Adyen\Payment\Helper\PaymentMethods;
 use Adyen\Payment\Helper\PaymentResponseHandler;
-use Adyen\Payment\Model\PaymentResponse;
 use Adyen\Payment\Model\ResourceModel\PaymentResponse\Collection;
 use Adyen\Payment\Model\Ui\AdyenCheckoutSuccessConfigProvider;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -28,53 +27,17 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 
 class Success extends \Magento\Multishipping\Block\Checkout\Success
 {
-    /**
-     * @var bool
-     */
-    private $isAdyenPayment;
-
-    /**
-     * @var PaymentResponse[]
-     */
-    private $paymentResponseEntities;
-
-    /**
-     * @var Data
-     */
-    private $adyenHelper;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializerInterface;
-
-    /**
-     * @var AdyenCheckoutSuccessConfigProvider
-     */
-    private $configProvider;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private $orderRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $searchCriteriaBuilder;
-
-
-    private $configHelper;
-
-    /**
-     * @var []
-     */
-    private $ordersInfo;
+    private bool $isAdyenPayment;
+    private ?array $paymentResponseEntities;
+    private ?array $ordersInfo;
+    private Data $adyenHelper;
+    private StoreManagerInterface $storeManager;
+    private SerializerInterface $serializerInterface;
+    private AdyenCheckoutSuccessConfigProvider $configProvider;
+    private OrderRepositoryInterface $orderRepository;
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
+    private Config $configHelper;
+    private PaymentMethods $paymentMethodsHelper;
 
     public function __construct(
         Collection $paymentResponseCollection,

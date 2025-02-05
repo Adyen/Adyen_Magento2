@@ -18,20 +18,18 @@ use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestAdyenStateData implements GuestAdyenStateDataInterface
 {
-    private StateDataHelper $stateDataHelper;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
+    /**
+     * @param StateDataHelper $stateDataHelper
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        StateDataHelper $stateDataHelper,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->stateDataHelper = $stateDataHelper;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        private readonly StateDataHelper $stateDataHelper,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param string $stateData
@@ -61,14 +59,15 @@ class GuestAdyenStateData implements GuestAdyenStateDataInterface
     }
 
     /**
+     * @param string $cartId
+     * @return int
      * @throws InputException
      */
     private function getQuoteIdFromMaskedCartId(string $cartId): int
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
-
-        if (is_null($quoteId)) {
+        try {
+            $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
+        } catch (NoSuchEntityException $e) {
             $errorMessage = __("An error occurred: missing required parameter :cartId!");
             throw new InputException($errorMessage);
         }

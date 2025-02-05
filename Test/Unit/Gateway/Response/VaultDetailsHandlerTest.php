@@ -15,6 +15,8 @@ class VaultDetailsHandlerTest extends AbstractAdyenTestCase
 {
     private VaultDetailsHandler $vaultDetailsHandler;
     private Payment|MockObject $paymentMock;
+    private Vault|MockObject $vaultHelperMock;
+    private PaymentDataObject $paymentDataObject;
     private array $handlingSubject;
 
     public function setUp() : void

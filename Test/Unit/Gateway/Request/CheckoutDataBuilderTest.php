@@ -10,6 +10,7 @@ use Adyen\Payment\Helper\OpenInvoice;
 use Adyen\Payment\Helper\StateData;
 use Adyen\Payment\Model\Config\Source\ThreeDSFlow;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
+use Magento\Catalog\Helper\Image;
 use Magento\Payment\Gateway\Data\PaymentDataObject;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Model\Order;
@@ -26,6 +27,7 @@ class CheckoutDataBuilderTest extends AbstractAdyenTestCase
     protected ChargedCurrency|MockObject $chargedCurrencyMock;
     protected Config|MockObject $configMock;
     protected OpenInvoice|MockObject $openInvoiceMock;
+    protected Image|MockObject $imageMock;
 
     public function setUp(): void
     {
@@ -35,6 +37,7 @@ class CheckoutDataBuilderTest extends AbstractAdyenTestCase
         $this->chargedCurrencyMock = $this->createMock(ChargedCurrency::class);
         $this->configMock = $this->createMock(Config::class);
         $this->openInvoiceMock = $this->createMock(OpenInvoice::class);
+        $this->imageMock = $this->createMock(Image::class);
 
         $this->checkoutDataBuilder = new CheckoutDataBuilder(
             $this->adyenHelperMock,
@@ -42,7 +45,8 @@ class CheckoutDataBuilderTest extends AbstractAdyenTestCase
             $this->cartRepositoryMock,
             $this->chargedCurrencyMock,
             $this->configMock,
-            $this->openInvoiceMock
+            $this->openInvoiceMock,
+            $this->imageMock
         );
 
         parent::setUp();

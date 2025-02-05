@@ -17,6 +17,7 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\Setup\Patch\PatchInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\StatusFactory;
 use Magento\Sales\Model\ResourceModel\Order\StatusFactory as StatusResourceFactory;
@@ -50,7 +51,7 @@ class CreateStatusAuthorized implements DataPatchInterface
         $this->statusResourceFactory = $statusResourceFactory;
     }
 
-    public function apply()
+    public function apply(): PatchInterface
     {
         /** @var StatusResource $statusResource */
         $statusResource = $this->statusResourceFactory->create();
@@ -64,7 +65,7 @@ class CreateStatusAuthorized implements DataPatchInterface
         try {
             $statusResource->save($status);
         } catch (AlreadyExistsException $exception) {
-            return;
+            return $this;
         }
 
         $status->assignState(self::ADYEN_AUTHORIZED_STATUS, true, true);
@@ -85,6 +86,8 @@ class CreateStatusAuthorized implements DataPatchInterface
 
         // re-initialize otherwise it will cause errors
         $this->reinitableConfig->reinit();
+
+        return $this;
     }
 
     /**

@@ -16,51 +16,23 @@ use Adyen\Payment\Logger\AdyenLogger;
 use Exception;
 use Magento\Checkout\Api\GuestPaymentInformationManagementInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestPaymentInformationResetOrderId
 {
     /**
-     * Quote repository.
-     *
-     * @var CartRepositoryInterface
-     */
-    protected $quoteRepository;
-
-    /**
-     * Payment methods helper
-     *
-     * @var PaymentMethods
-     */
-    protected $paymentMethodsHelper;
-
-    /**
-     * @var AdyenLogger
-     */
-    protected $adyenLogger;
-
-    /**
-     * @var QuoteIdMaskFactory
-     */
-    protected $quoteIdMaskFactory;
-
-    /**
      * GuestPaymentInformationResetOrderId constructor.
      * @param CartRepositoryInterface $quoteRepository
+     * @param PaymentMethods $paymentMethodsHelper
      * @param AdyenLogger $adyenLogger
-     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
      */
     public function __construct(
-        CartRepositoryInterface $quoteRepository,
-        QuoteIdMaskFactory $quoteIdMaskFactory,
-        PaymentMethods $paymentMethodsHelper,
-        AdyenLogger $adyenLogger
-    ) {
-        $this->quoteRepository = $quoteRepository;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-        $this->paymentMethodsHelper = $paymentMethodsHelper;
-        $this->adyenLogger = $adyenLogger;
-    }
+        protected readonly CartRepositoryInterface $quoteRepository,
+        protected readonly PaymentMethods $paymentMethodsHelper,
+        protected readonly AdyenLogger $adyenLogger,
+        protected readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param GuestPaymentInformationManagementInterface $subject
@@ -72,12 +44,11 @@ class GuestPaymentInformationResetOrderId
         $cartId
     ) {
         try {
-            $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-            $quoteId = $quoteIdMask->getQuoteId();
+            $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
             $quote = $this->quoteRepository->get($quoteId);
-            $method = strval($quote->getPayment()->getMethod());
+            $method = $quote->getPayment()->getMethod();
 
-            if ($this->paymentMethodsHelper->isAdyenPayment($method)) {
+            if (isset($method) && $this->paymentMethodsHelper->isAdyenPayment($method)) {
                 $quote->setReservedOrderId(null);
             }
         } catch (Exception $e) {

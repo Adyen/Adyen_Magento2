@@ -73,6 +73,15 @@ class PaymentMethodsTest extends AbstractAdyenTestCase
     private AdyenDataHelper $adyenDataHelperMock;
     private PaymentTokenRepositoryInterface $paymentTokenRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
+    private Address $billingAddressMock;
+    private AdyenAmountCurrency $amountCurrencyMock;
+    private MethodInterface $methodMock;
+    private Order $orderMock;
+    private Notification $notificationMock;
+    private Order\Payment $orderPaymentMock;
+    private Store $storeMock;
+    private Quote $quoteMock;
+    private ObjectManager $objectManager;
 
     protected function setUp(): void
     {

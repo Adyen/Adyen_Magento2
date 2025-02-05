@@ -16,23 +16,20 @@ use Adyen\AdyenException;
 use Adyen\Payment\Api\GuestAdyenDonationsInterface;
 use Adyen\Payment\Model\Sales\OrderRepository;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestAdyenDonations implements GuestAdyenDonationsInterface
 {
-    private AdyenDonations $adyenDonationsModel;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-    private OrderRepository $orderRepository;
-
+    /**
+     * @param AdyenDonations $adyenDonationsModel
+     * @param OrderRepository $orderRepository
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        AdyenDonations $adyenDonationsModel,
-        QuoteIdMaskFactory $quoteIdMaskFactory,
-        OrderRepository $orderRepository
-    ) {
-        $this->adyenDonationsModel = $adyenDonationsModel;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-        $this->orderRepository = $orderRepository;
-    }
+        private readonly AdyenDonations $adyenDonationsModel,
+        private readonly OrderRepository $orderRepository,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param string $cartId
@@ -43,8 +40,7 @@ class GuestAdyenDonations implements GuestAdyenDonationsInterface
      */
     public function donate(string $cartId, string $payload): void
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
 
         $order = $this->orderRepository->getOrderByQuoteId($quoteId);
 

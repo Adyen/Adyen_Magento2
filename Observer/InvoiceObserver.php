@@ -11,14 +11,11 @@
 
 namespace Adyen\Payment\Observer;
 
+use Adyen\Payment\Api\Repository\AdyenOrderPaymentRepositoryInterface;
 use Adyen\Payment\Helper\AdyenOrderPayment;
 use Adyen\Payment\Api\Data\OrderPaymentInterface;
-use Adyen\Payment\Helper\Config;
 use Adyen\Payment\Helper\Invoice as InvoiceHelper;
-use Adyen\Payment\Helper\Order as OrderHelper;
 use Adyen\Payment\Logger\AdyenLogger;
-use Adyen\Payment\Model\Order\PaymentFactory;
-use Adyen\Payment\Model\ResourceModel\Order\Payment;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\AlreadyExistsException;
@@ -29,56 +26,22 @@ use Adyen\Payment\Helper\PaymentMethods;
 
 class InvoiceObserver implements ObserverInterface
 {
-    /** @var Payment $adyenPaymentResourceModel */
-    private $adyenPaymentResourceModel;
-
-    /** @var PaymentFactory */
-    private $adyenOrderPaymentFactory;
-
-    /** @var InvoiceHelper $invoiceHelper*/
-    private $invoiceHelper;
-
-    /** @var StatusResolver $statusResolver */
-    private $statusResolver;
-
-    /** @var AdyenOrderPayment $adyenOrderPaymentHelper */
-    private $adyenOrderPaymentHelper;
-
-    /** @var Config $configHelper */
-    private $configHelper;
-
-    /** @var PaymentMethods $paymentMethodsHelper */
-    private $paymentMethodsHelper;
-
-    /** @var OrderHelper */
-    private $orderHelper;
-
     /**
-     * @var AdyenLogger
+     * @param InvoiceHelper $invoiceHelper
+     * @param StatusResolver $statusResolver
+     * @param AdyenOrderPayment $adyenOrderPaymentHelper
+     * @param AdyenLogger $logger
+     * @param PaymentMethods $paymentMethodsHelper
+     * @param AdyenOrderPaymentRepositoryInterface $adyenOrderPaymentRepository
      */
-    private $logger;
-
     public function __construct(
-        Payment $adyenPaymentResourceModel,
-        PaymentFactory $adyenOrderPaymentFactory,
-        InvoiceHelper $invoiceHelper,
-        StatusResolver $statusResolver,
-        AdyenOrderPayment $adyenOrderPaymentHelper,
-        Config $configHelper,
-        AdyenLogger $adyenLogger,
-        PaymentMethods $paymentMethodsHelper,
-        OrderHelper $orderHelper
-    ) {
-        $this->adyenPaymentResourceModel = $adyenPaymentResourceModel;
-        $this->adyenOrderPaymentFactory = $adyenOrderPaymentFactory;
-        $this->invoiceHelper = $invoiceHelper;
-        $this->statusResolver = $statusResolver;
-        $this->adyenOrderPaymentHelper = $adyenOrderPaymentHelper;
-        $this->configHelper = $configHelper;
-        $this->logger = $adyenLogger;
-        $this->paymentMethodsHelper = $paymentMethodsHelper;
-        $this->orderHelper = $orderHelper;
-    }
+        private readonly InvoiceHelper $invoiceHelper,
+        private readonly StatusResolver $statusResolver,
+        private readonly AdyenOrderPayment $adyenOrderPaymentHelper,
+        private readonly AdyenLogger $logger,
+        private readonly PaymentMethods $paymentMethodsHelper,
+        private readonly AdyenOrderPaymentRepositoryInterface $adyenOrderPaymentRepository
+    ) { }
 
     /**
      * Link all adyen_invoices to the appropriate magento invoice and set the order to PROCESSING to allow
@@ -87,10 +50,8 @@ class InvoiceObserver implements ObserverInterface
      * @param Observer $observer
      * @throws AlreadyExistsException
      */
-    public function execute(Observer $observer)
+    public function execute(Observer $observer): void
     {
-        $adyenOrderPaymentFactory = $this->adyenOrderPaymentFactory->create();
-
         /** @var Invoice $invoice */
         $invoice = $observer->getData('invoice');
         $order = $invoice->getOrder();
@@ -107,15 +68,14 @@ class InvoiceObserver implements ObserverInterface
             array_merge($this->logger->getInvoiceContext($invoice), $this->logger->getOrderContext($order))
         );
 
-        $adyenOrderPayments = $this->adyenPaymentResourceModel->getLinkedAdyenOrderPayments(
+        $adyenOrderPayments = $this->adyenOrderPaymentRepository->getByPaymentId(
             $payment->getEntityId(),
             [OrderPaymentInterface::CAPTURE_STATUS_NO_CAPTURE, OrderPaymentInterface::CAPTURE_STATUS_PARTIAL_CAPTURE]
         );
+
         foreach ($adyenOrderPayments as $adyenOrderPayment) {
-            /** @var \Adyen\Payment\Model\Order\Payment $adyenOrderPaymentObject */
-            $adyenOrderPaymentObject = $adyenOrderPaymentFactory->load($adyenOrderPayment[OrderPaymentInterface::ENTITY_ID], OrderPaymentInterface::ENTITY_ID);
-            $linkedAmount = $this->invoiceHelper->linkAndUpdateAdyenInvoices($adyenOrderPaymentObject, $invoice);
-            $this->adyenOrderPaymentHelper->updatePaymentTotalCaptured($adyenOrderPaymentObject, $linkedAmount);
+            $linkedAmount = $this->invoiceHelper->linkAndUpdateAdyenInvoices($adyenOrderPayment, $invoice);
+            $this->adyenOrderPaymentHelper->updatePaymentTotalCaptured($adyenOrderPayment, $linkedAmount);
         }
 
         $status = $this->statusResolver->getOrderStatusByState($order, Order::STATE_PAYMENT_REVIEW);

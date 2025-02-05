@@ -5,21 +5,23 @@ namespace Adyen\Payment\Test\Unit\Model\Config\Backend;
 use Adyen\Payment\Helper\BaseUrlHelper;
 use Adyen\Payment\Helper\ManagementHelper;
 use Adyen\Payment\Model\Config\Backend\AutoConfiguration;
-use Adyen\Payment\Helper\Data;
-use Adyen\Payment\Helper\Config;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 
 class AutoConfigurationTest extends AbstractAdyenTestCase
 {
     protected AutoConfiguration $autoConfiguration;
+    private Context $contextMock;
+    private Registry $registryMock;
+    private ScopeConfigInterface $scopeConfigMock;
+    private TypeListInterface $typeListtMock;
+    private ManagementHelper $managementHelperMock;
+    private UrlInterface $urlMock;
+    private BaseUrlHelper $baseUrlHelperMock;
 
     protected function setUp(): void
     {

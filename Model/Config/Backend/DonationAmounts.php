@@ -11,7 +11,6 @@
 
 namespace Adyen\Payment\Model\Config\Backend;
 
-use Adyen\Payment\Helper\Data;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Value;
@@ -20,6 +19,7 @@ use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
+use Magento\Framework\Validator\Exception;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
@@ -29,45 +29,53 @@ use Magento\Store\Model\StoreManagerInterface;
 class DonationAmounts extends Value
 {
     /**
-     * @var Data
+     * @param Context $context
+     * @param Registry $registry
+     * @param ScopeConfigInterface $config
+     * @param TypeListInterface $cacheTypeList
+     * @param StoreManagerInterface $storeManager
+     * @param AbstractResource|null $resource
+     * @param AbstractDb|null $resourceCollection
+     * @param array $data
      */
-    protected $_adyenHelper;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    protected $storeManager;
-
     public function __construct(
         Context $context,
         Registry $registry,
         ScopeConfigInterface $config,
         TypeListInterface $cacheTypeList,
-        StoreManagerInterface $storeManager,
+        protected readonly StoreManagerInterface $storeManager,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->storeManager = $storeManager;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
-    public function validateBeforeSave()
+    /**
+     * @return $this
+     * @throws Exception
+     */
+    public function validateBeforeSave(): DonationAmounts
     {
         if (
-            (bool)$this->getFieldsetDataValue('active') &&
+            $this->getFieldsetDataValue('active') &&
             !$this->validateDonationAmounts(explode(',', $this->getValue()))
         ) {
-            throw new \Magento\Framework\Validator\Exception(
+            throw new Exception(
                 new Phrase(
                     'The Adyen Giving donation amounts are not valid, please enter amounts higher than zero separated by commas.'
                 )
             );
         }
+
+        return $this;
     }
 
-
-    public function validateDonationAmounts($amounts = array())
+    /**
+     * @param array $amounts
+     * @return bool
+     */
+    public function validateDonationAmounts(array $amounts = []): bool
     {
         // Fail if the field is empty, the array is associative
         if (empty($amounts) || array_values($amounts) !== $amounts) {

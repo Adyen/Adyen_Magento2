@@ -22,22 +22,25 @@ use Magento\Quote\Model\QuoteIdToMaskedQuoteId;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
-use Magento\Sales\Model\OrderFactory;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Sales\Model\OrderFactory;
 
 class Success extends Template
 {
     protected $order;
     protected CheckoutSession $checkoutSession;
     protected CustomerSession $customerSession;
-    protected OrderFactory $orderFactory;
     protected Data $adyenHelper;
     protected StoreManagerInterface $storeManager;
     private Config $configHelper;
     private SerializerInterface $serializerInterface;
     private AdyenCheckoutSuccessConfigProvider $configProvider;
     private QuoteIdToMaskedQuoteId $quoteIdToMaskedQuoteId;
+    private OrderRepositoryInterface $orderRepository;
+    /** @deprecated This property has been deprecated and will be removed on V10. */
+    protected OrderFactory $orderFactory;
 
     public function __construct(
         Context $context,
@@ -50,8 +53,11 @@ class Success extends Template
         AdyenCheckoutSuccessConfigProvider $configProvider,
         StoreManagerInterface $storeManager,
         SerializerInterface $serializerInterface,
+        OrderRepositoryInterface $orderRepository,
         array $data = []
     ) {
+        parent::__construct($context, $data);
+
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
         $this->quoteIdToMaskedQuoteId = $quoteIdToMaskedQuoteId;
@@ -61,7 +67,7 @@ class Success extends Template
         $this->configProvider = $configProvider;
         $this->storeManager = $storeManager;
         $this->serializerInterface = $serializerInterface;
-        parent::__construct($context, $data);
+        $this->orderRepository = $orderRepository;
     }
 
     /**
@@ -164,7 +170,7 @@ class Success extends Template
     public function getOrder()
     {
         if ($this->order == null) {
-            $this->order = $this->orderFactory->create()->load($this->checkoutSession->getLastOrderId());
+            $this->order = $this->orderRepository->get($this->checkoutSession->getLastOrderId());
         }
         return $this->order;
     }

@@ -21,58 +21,27 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Serialize\SerializerInterface;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class IndexTest extends AbstractAdyenTestCase
 {
-    /**
-     * @var Context|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $contextMock;
-
-    /**
-     * @var RequestInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $requestMock;
-
-    /**
-     * @var ResponseInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $responseMock;
-
-    /**
-     * @var JsonFactory|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $resultJsonFactoryMock;
-
-    /**
-     * @var Json|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $resultJsonMock;
-
-    /**
-     * @var Data|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $adyenHelperMock;
-
-    /**
-     * @var NotificationFactory|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $notificationHelperMock;
-
-    /**
-     * @var SerializerInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $serializerMock;
-
-    /**
-     * @var AdyenLogger|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private $adyenLoggerMock;
-
-    /**
-     * @var Index
-     */
-    private $indexController;
+    private Context|MockObject $contextMock;
+    private MockObject|RequestInterface $requestMock;
+    private ResponseInterface|MockObject $responseMock;
+    private JsonFactory|MockObject $resultJsonFactoryMock;
+    private MockObject|Json $resultJsonMock;
+    private Data|MockObject $adyenHelperMock;
+    private MockObject|NotificationFactory $notificationHelperMock;
+    private SerializerInterface|MockObject $serializerMock;
+    private AdyenLogger|MockObject $adyenLoggerMock;
+    private Index $indexController;
+    private http|MockObject $httpMock;
+    private IpAddress|MockObject $ipAddressHelperMock;
+    private Config|MockObject $configHelperMock;
+    private RateLimiter|MockObject $rateLimiterHelperMock;
+    private HmacSignature|MockObject $hmacSignatureMock;
+    private NotificationReceiver|MockObject $notificationReceiverMock;
+    private RemoteAddress|MockObject $remoteAddressMock;
 
     protected function setUp(): void
     {

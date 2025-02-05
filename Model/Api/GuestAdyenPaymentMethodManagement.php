@@ -11,31 +11,37 @@
 
 namespace Adyen\Payment\Model\Api;
 
+use Adyen\AdyenException;
 use Adyen\Payment\Api\GuestAdyenPaymentMethodManagementInterface;
 use Adyen\Payment\Helper\PaymentMethods;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestAdyenPaymentMethodManagement implements GuestAdyenPaymentMethodManagementInterface
 {
-    protected QuoteIdMaskFactory $quoteIdMaskFactory;
-    protected PaymentMethods $paymentMethodsHelper;
-
     public function __construct(
-        QuoteIdMaskFactory $quoteIdMaskFactory,
-        PaymentMethods $paymentMethodsHelper
-    ) {
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-        $this->paymentMethodsHelper = $paymentMethodsHelper;
-    }
+        private readonly PaymentMethods $paymentMethodsHelper,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
+    /**
+     * @param string $cartId
+     * @param string|null $shopperLocale
+     * @param string|null $country
+     * @param string|null $channel
+     * @return string
+     * @throws AdyenException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getPaymentMethods(
         string $cartId,
         ?string $shopperLocale = null,
         ?string $country = null,
         ?string $channel = null
     ): string {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
 
         return $this->paymentMethodsHelper->getPaymentMethods($quoteId, $country, $shopperLocale, $channel);
     }

@@ -15,33 +15,29 @@ use Adyen\Payment\Model\Api\AdyenPaymentsDetails;
 use Adyen\Payment\Model\Api\GuestAdyenPaymentsDetails;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\Exception\NotFoundException;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Magento\Quote\Model\QuoteIdMask;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class GuestAdyenPaymentsDetailsTest extends AbstractAdyenTestCase
 {
-    private $guestAdyenPaymentsDetails;
-    private $orderRepositoryMock;
-    private $quoteIdMaskFactoryMask;
-    private $adyenPaymentsDetailsMock;
+    private GuestAdyenPaymentsDetails $guestAdyenPaymentsDetails;
+    private OrderRepositoryInterface|MockObject $orderRepositoryMock;
+    private AdyenPaymentsDetails|MockObject $adyenPaymentsDetailsMock;
+    private MaskedQuoteIdToQuoteIdInterface|MockObject $maskedQuoteIdToQuoteIdMock;
 
     protected function setUp(): void
     {
         $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
         $this->adyenPaymentsDetailsMock = $this->createMock(AdyenPaymentsDetails::class);
-        $this->quoteIdMaskFactoryMask = $this->createGeneratedMock(QuoteIdMaskFactory::class, [
-            'create'
-        ]);
+        $this->maskedQuoteIdToQuoteIdMock = $this->createMock(MaskedQuoteIdToQuoteIdInterface::class);
 
-        $objectManager = new ObjectManager($this);
-        $this->guestAdyenPaymentsDetails = $objectManager->getObject(GuestAdyenPaymentsDetails::class, [
-            'orderRepository' => $this->orderRepositoryMock,
-            'adyenPaymentsDetails' => $this->adyenPaymentsDetailsMock,
-            'quoteIdMaskFactory' => $this->quoteIdMaskFactoryMask
-        ]);
+        $this->guestAdyenPaymentsDetails = new GuestAdyenPaymentsDetails(
+            $this->orderRepositoryMock,
+            $this->adyenPaymentsDetailsMock,
+            $this->maskedQuoteIdToQuoteIdMock
+        );
     }
 
     public function testSuccessfulCall()
@@ -53,15 +49,7 @@ class GuestAdyenPaymentsDetailsTest extends AbstractAdyenTestCase
         $cartId = 99;
         $orderQuoteId = 99;
 
-        $quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, [
-            'load',
-            'getQuoteId'
-        ]);
-        $quoteIdMaskMock->method('load')->willReturn($quoteIdMaskMock);
-        $quoteIdMaskMock->method('getQuoteId')->willReturn($cartId);
-
-        $this->quoteIdMaskFactoryMask->method('create')
-            ->willReturn($quoteIdMaskMock);
+        $this->maskedQuoteIdToQuoteIdMock->expects($this->once())->method('execute')->willReturn($cartId);
 
         $orderMock = $this->createMock(OrderInterface::class);
         $orderMock->method('getQuoteId')->willReturn($orderQuoteId);
@@ -89,16 +77,8 @@ class GuestAdyenPaymentsDetailsTest extends AbstractAdyenTestCase
         $cartId = 99;
         $orderQuoteId = 200;
 
-        $quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, [
-            'load',
-            'getQuoteId'
-        ]);
-        $quoteIdMaskMock->method('load')->willReturn($quoteIdMaskMock);
-        $quoteIdMaskMock->method('getQuoteId')->willReturn($cartId);
-
-        $this->quoteIdMaskFactoryMask->method('create')
-            ->willReturn($quoteIdMaskMock);
-
+        $this->maskedQuoteIdToQuoteIdMock->expects($this->once())->method('execute')->willReturn($cartId);
+        
         $orderMock = $this->createMock(OrderInterface::class);
         $orderMock->method('getQuoteId')->willReturn($orderQuoteId);
 

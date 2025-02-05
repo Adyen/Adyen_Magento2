@@ -19,6 +19,7 @@ use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderStatusHistoryRepositoryInterface;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Sales\Model\OrderRepository;
 use Magento\Sales\Model\ResourceModel\Order;
@@ -64,6 +65,7 @@ class PaymentResponseHandler
     private PaymentResponseCollectionFactory $paymentResponseCollectionFactory;
     private Config $configHelper;
     private PaymentMethods $paymentMethodsHelper;
+    private OrderStatusHistoryRepositoryInterface $orderStatusHistoryRepository;
 
     public function __construct(
         AdyenLogger $adyenLogger,
@@ -77,6 +79,7 @@ class PaymentResponseHandler
         StateData $stateDataHelper,
         PaymentResponseCollectionFactory $paymentResponseCollectionFactory,
         Config $configHelper,
+        OrderStatusHistoryRepositoryInterface $orderStatusHistoryRepository,
         PaymentMethods $paymentMethodsHelper
     ) {
         $this->adyenLogger = $adyenLogger;
@@ -91,6 +94,7 @@ class PaymentResponseHandler
         $this->paymentResponseCollectionFactory = $paymentResponseCollectionFactory;
         $this->configHelper = $configHelper;
         $this->paymentMethodsHelper = $paymentMethodsHelper;
+        $this->orderStatusHistoryRepository = $orderStatusHistoryRepository;
     }
 
     public function formatPaymentResponse(
@@ -349,7 +353,7 @@ class PaymentResponseHandler
             ->setEntityName('order')
             ->setOrder($order);
 
-        $history->save();
+        $this->orderStatusHistoryRepository->save($history);
 
         // needed because then we need to save $order objects
         $order->setAdyenResulturlEventCode($authResult);

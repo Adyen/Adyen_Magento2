@@ -11,14 +11,16 @@ use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Adyen\Service\Checkout;
 use Adyen\AdyenException;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class TransactionCancelTest extends AbstractAdyenTestCase
 {
-    private $adyenHelperMock;
-    private $idempotencyHelperMock;
-    private $transferObjectMock;
-    private $checkoutServiceMock;
-    private $transactionCancel;
+    private TransactionCancel $transactionCancel;
+    private Data|MockObject $adyenHelperMock;
+    private Idempotency|MockObject $idempotencyHelperMock;
+    private TransferInterface|MockObject $transferObjectMock;
+    private Checkout\ModificationsApi|MockObject $checkoutServiceMock;
+    private Client|MockObject $clientMock;
 
     protected function setUp(): void
     {
@@ -32,6 +34,7 @@ class TransactionCancelTest extends AbstractAdyenTestCase
         $this->checkoutServiceMock
             ->method('cancelAuthorisedPaymentByPspReference')
             ->willReturn(new PaymentCancelResponse(['status' => 'received']));
+
         $this->transactionCancel = new TransactionCancel(
             $this->adyenHelperMock,
             $this->idempotencyHelperMock

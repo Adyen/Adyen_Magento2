@@ -12,6 +12,7 @@
 
 namespace Adyen\Payment\Model\ResourceModel\Creditmemo;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class Creditmemo extends AbstractDb
@@ -29,6 +30,8 @@ class Creditmemo extends AbstractDb
     /**
      * Get all the adyen_creditmemo entries linked to the adyen_order_payment
      *
+     * @deprecated Use AdyenCreditmemoRepositoryInterface::getByAdyenOrderPaymentId() instead.
+     *
      * @param int $adyenPaymentId
      * @return array|null
      */
@@ -44,6 +47,8 @@ class Creditmemo extends AbstractDb
     }
 
     /**
+     * @deprecated Use AdyenCreditmemoRepositoryInterface::getByRefundWebhook() instead.
+     *
      * @param string $pspreference
      * @return array|null
      */
@@ -56,5 +61,23 @@ class Creditmemo extends AbstractDb
         $result = $this->getConnection()->fetchRow($select);
 
         return empty($result) ? null : $result;
+    }
+
+    /**
+     * @param string $pspreference
+     * @return string
+     * @throws LocalizedException
+     */
+    public function getIdByPspreference(string $pspreference): string
+    {
+        $connection = $this->getConnection();
+
+        $select = $connection->select()
+            ->from($this->getMainTable(), 'entity_id')
+            ->where('pspreference = :pspreference');
+
+        $bind = [':pspreference' => $pspreference];
+
+        return $connection->fetchOne($select, $bind);
     }
 }

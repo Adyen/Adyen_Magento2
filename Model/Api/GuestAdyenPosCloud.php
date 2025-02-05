@@ -14,43 +14,43 @@ namespace Adyen\Payment\Model\Api;
 use Adyen\Payment\Api\GuestAdyenPosCloudInterface;
 use Adyen\Payment\Logger\AdyenLogger;
 use Adyen\Payment\Model\Sales\OrderRepository;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Command\CommandPoolInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectFactoryInterface;
-use Magento\Quote\Model\QuoteIdMaskFactory;
-
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestAdyenPosCloud extends AdyenPosCloud implements GuestAdyenPosCloudInterface
 {
-    protected AdyenLogger $adyenLogger;
-    protected OrderRepository $orderRepository;
-    protected PaymentDataObjectFactoryInterface $paymentDataObjectFactory;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
+    /**
+     * @param CommandPoolInterface $commandPool
+     * @param OrderRepository $orderRepository
+     * @param PaymentDataObjectFactoryInterface $paymentDataObjectFactory
+     * @param AdyenLogger $adyenLogger
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        CommandPoolInterface              $commandPool,
-        OrderRepository                   $orderRepository,
+        CommandPoolInterface $commandPool,
+        OrderRepository $orderRepository,
         PaymentDataObjectFactoryInterface $paymentDataObjectFactory,
-        AdyenLogger                       $adyenLogger,
-        QuoteIdMaskFactory                $quoteIdMaskFactory
-    )
-    {
+        AdyenLogger $adyenLogger,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) {
         parent::__construct(
             $commandPool,
             $orderRepository,
             $paymentDataObjectFactory,
             $adyenLogger
         );
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
     }
 
     /**
      * @param string $cartId
      * @return void
+     * @throws NoSuchEntityException
      */
     public function payByCart(string $cartId): void
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
         $order = $this->orderRepository->getOrderByQuoteId($quoteId);
         $this->execute($order);
     }

@@ -20,6 +20,7 @@ use Adyen\Payment\Model\Config\Source\ThreeDSFlow;
 use Adyen\Payment\Model\Ui\AdyenPayByLinkConfigProvider;
 use Adyen\Payment\Observer\AdyenCcDataAssignObserver;
 use Adyen\Payment\Observer\AdyenPaymentMethodDataAssignObserver;
+use Magento\Catalog\Helper\Image;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Data\PaymentDataObject;
 use Magento\Payment\Gateway\Helper\SubjectReader;
@@ -36,35 +37,13 @@ class CheckoutDataBuilder implements BuilderInterface
         self::ADYEN_BOLETO
     ];
 
-    /**
-     * @var Data
-     */
     private Data $adyenHelper;
-
-    /**
-     * @var CartRepositoryInterface
-     */
     private CartRepositoryInterface $cartRepository;
-
-    /**
-     * @var ChargedCurrency
-     */
     private ChargedCurrency $chargedCurrency;
-
-    /**
-     * @var StateData
-     */
     private StateData $stateData;
-
-    /**
-     * @var Config
-     */
     private Config $configHelper;
-
-    /**
-     * @var OpenInvoice
-     */
     private OpenInvoice $openInvoiceHelper;
+    private Image $imageHelper;
 
     /**
      * CheckoutDataBuilder constructor.
@@ -74,6 +53,7 @@ class CheckoutDataBuilder implements BuilderInterface
      * @param ChargedCurrency $chargedCurrency
      * @param Config $configHelper
      * @param OpenInvoice $openInvoiceHelper
+     * @param Image $imageHelper
      */
     public function __construct(
         Data $adyenHelper,
@@ -81,7 +61,8 @@ class CheckoutDataBuilder implements BuilderInterface
         CartRepositoryInterface $cartRepository,
         ChargedCurrency $chargedCurrency,
         Config $configHelper,
-        OpenInvoice $openInvoiceHelper
+        OpenInvoice $openInvoiceHelper,
+        Image $imageHelper
     ) {
         $this->adyenHelper = $adyenHelper;
         $this->stateData = $stateData;
@@ -89,6 +70,7 @@ class CheckoutDataBuilder implements BuilderInterface
         $this->chargedCurrency = $chargedCurrency;
         $this->configHelper = $configHelper;
         $this->openInvoiceHelper = $openInvoiceHelper;
+        $this->imageHelper = $imageHelper;
     }
 
     /**

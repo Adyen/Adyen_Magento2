@@ -21,31 +21,18 @@ use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class RemoveAdyenStateData implements ResolverInterface
 {
     /**
-     * @var AdyenStateData
-     */
-    private AdyenStateData $adyenStateData;
-
-    /**
-     * @var QuoteIdMaskFactory
-     */
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
-    /**
      * @param AdyenStateData $adyenStateData
-     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
      */
     public function __construct(
-        AdyenStateData $adyenStateData,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->adyenStateData = $adyenStateData;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        private readonly AdyenStateData $adyenStateData,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param Field $field
@@ -73,11 +60,10 @@ class RemoveAdyenStateData implements ResolverInterface
             throw new GraphQlInputException(__('Required parameter "cartId" is missing'));
         }
 
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($args['cartId'], 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($args['cartId']);
 
         try {
-            $result = $this->adyenStateData->remove((int) $args['stateDataId'], (int) $quoteId);
+            $result = $this->adyenStateData->remove((int) $args['stateDataId'], $quoteId);
         } catch (Exception $e) {
             throw new GraphQlAdyenException(__('An error occurred while removing the state data.'), $e);
         }
@@ -89,5 +75,3 @@ class RemoveAdyenStateData implements ResolverInterface
         return ['stateDataId' => $args['stateDataId']];
     }
 }
-
-

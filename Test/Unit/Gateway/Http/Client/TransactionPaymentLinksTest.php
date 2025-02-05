@@ -13,15 +13,17 @@ use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Adyen\Client;
 use Adyen\Service\Checkout\PaymentLinksApi;
 use Magento\Payment\Gateway\Http\TransferInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class TransactionPaymentLinksTest extends AbstractAdyenTestCase
 {
-    private $clientMock;
-    private $adyenHelperMock;
-    private $idempotencyHelperMock;
-    private $transferObjectMock;
-    private $transactionPaymentLinks;
-    private $paymentLinksApiMock;
+    private TransactionPaymentLinks $transactionPaymentLinks;
+    private Client|MockObject $clientMock;
+    private Data|MockObject $adyenHelperMock;
+    private Idempotency|MockObject $idempotencyHelperMock;
+    private TransferInterface|MockObject $transferObjectMock;
+    private PaymentLinksApi|MockObject $paymentLinksApiMock;
+    private ApplicationInfo|MockObject $applicationInfoMock;
 
     protected function setUp(): void
     {

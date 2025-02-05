@@ -12,8 +12,9 @@
 
 namespace Adyen\Payment\Model\ResourceModel\Invoice;
 
+use Adyen\Payment\Api\Data\InvoiceInterface;
 use Adyen\Payment\Model\Notification;
-use Adyen\Payment\Setup\UpgradeSchema;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 use Magento\Sales\Model\Order;
 
@@ -24,13 +25,15 @@ class Invoice extends AbstractDb
      *
      * @return void
      */
-    protected function _construct()
+    protected function _construct(): void
     {
         $this->_init('adyen_invoice', 'entity_id');
     }
 
     /**
      * Get all the adyen_invoice entries linked to the adyen_order_payment
+     *
+     * @deprecated Use Adyen\Payment\Helper\Invoice::getAdyenInvoicesByAdyenPaymentId() method instead.
      *
      * @param $adyenPaymentId
      * @return array|null
@@ -49,6 +52,8 @@ class Invoice extends AbstractDb
     /**
      * Get the respective adyen_invoice entry by using the pspReference of the original payment, the pspReference of the capture
      * and the magento payment_id linked to this order
+     *
+     * @deprecated Use AdyenInvoiceRepositoryInterface::getByCaptureWebhook() instead.
      *
      * @param Order $order
      * @param Notification $notification
@@ -71,5 +76,25 @@ class Invoice extends AbstractDb
         $result = $this->getConnection()->fetchRow($select);
 
         return empty($result) ? null : $result;
+    }
+
+    /**
+     * Gets the entity_id of the adyen_invoice by the given `pspreference`
+     *
+     * @param string $pspreference
+     * @return string
+     * @throws LocalizedException
+     */
+    public function getIdByPspreference(string $pspreference): string
+    {
+        $connection = $this->getConnection();
+
+        $select = $connection->select()
+            ->from($this->getMainTable(), InvoiceInterface::ENTITY_ID)
+            ->where('pspreference = :pspreference');
+
+        $bind = [':pspreference' => $pspreference];
+
+        return $connection->fetchOne($select, $bind);
     }
 }

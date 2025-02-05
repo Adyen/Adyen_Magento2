@@ -21,6 +21,7 @@ use Adyen\Payment\Helper\PaymentMethods;
 class RecurringDataTest extends AbstractAdyenTestCase
 {
     private RecurringData $recurringData;
+    private PaymentMethodsFactory $paymentMethodsFactoryMock;
 
     protected function setUp(): void
     {

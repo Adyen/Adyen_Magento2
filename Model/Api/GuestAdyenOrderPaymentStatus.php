@@ -17,39 +17,33 @@ use Adyen\Payment\Helper\Data;
 use Adyen\Payment\Helper\PaymentResponseHandler;
 use Adyen\Payment\Logger\AdyenLogger;
 use Magento\Framework\Exception\NotFoundException;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 class GuestAdyenOrderPaymentStatus implements GuestAdyenOrderPaymentStatusInterface
 {
-    protected OrderRepositoryInterface $orderRepository;
-    protected AdyenLogger $adyenLogger;
-    protected Data $adyenHelper;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-    private PaymentResponseHandler $paymentResponseHandler;
-
+    /**
+     * @param OrderRepositoryInterface $orderRepository
+     * @param AdyenLogger $adyenLogger
+     * @param Data $adyenHelper
+     * @param PaymentResponseHandler $paymentResponseHandler
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        AdyenLogger $adyenLogger,
-        Data $adyenHelper,
-        PaymentResponseHandler $paymentResponseHandler,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->orderRepository = $orderRepository;
-        $this->adyenLogger = $adyenLogger;
-        $this->adyenHelper = $adyenHelper;
-        $this->paymentResponseHandler = $paymentResponseHandler;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        protected readonly OrderRepositoryInterface $orderRepository,
+        protected readonly AdyenLogger $adyenLogger,
+        protected readonly Data $adyenHelper,
+        private readonly PaymentResponseHandler $paymentResponseHandler,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     public function getOrderPaymentStatus(string $orderId, string $cartId): string
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
 
         $order = $this->orderRepository->get($orderId);
 
-        if ($order->getQuoteId() !== $quoteId) {
+        if (intval($order->getQuoteId()) !== $quoteId) {
             $errorMessage = sprintf("Order for ID %s not found!", $orderId);
             $this->adyenLogger->error($errorMessage);
 

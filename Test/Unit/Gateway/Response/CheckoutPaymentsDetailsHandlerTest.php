@@ -16,6 +16,8 @@ class CheckoutPaymentsDetailsHandlerTest extends AbstractAdyenTestCase
     private CheckoutPaymentsDetailsHandler $checkoutPaymentsDetailsHandler;
     private Payment|MockObject $paymentMock;
     private Order|MockObject $orderMock;
+    private Data|MockObject $adyenHelperMock;
+    private PaymentDataObject $paymentDataObject;
     private array $handlingSubject;
 
     protected function setUp(): void

@@ -19,6 +19,7 @@ use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\MethodInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Order\StatusResolver;
@@ -31,6 +32,7 @@ class SetOrderStateAfterPaymentObserverTest extends AbstractAdyenTestCase
     private $orderMock;
     private $statusResolverMock;
     private $configHelperMock;
+    private $orderRepositoryMock;
 
     const STORE_ID = 1;
 
@@ -41,6 +43,7 @@ class SetOrderStateAfterPaymentObserverTest extends AbstractAdyenTestCase
         $this->orderMock = $this->createMock(Order::class);
         $this->statusResolverMock = $this->createMock(Order\StatusResolver::class);
         $this->configHelperMock = $this->createMock(Config::class);
+        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
 
         $paymentMethodInstanceMock = $this->createMock(Adapter::class);
         $this->paymentMock->method('getMethodInstance')->willReturn($paymentMethodInstanceMock);
@@ -51,7 +54,8 @@ class SetOrderStateAfterPaymentObserverTest extends AbstractAdyenTestCase
 
         $this->setOrderStateAfterPaymentObserver = new SetOrderStateAfterPaymentObserver(
             $this->statusResolverMock,
-            $this->configHelperMock
+            $this->configHelperMock,
+            $this->orderRepositoryMock
         );
     }
 
@@ -98,10 +102,10 @@ class SetOrderStateAfterPaymentObserverTest extends AbstractAdyenTestCase
 
         if ($changeStatus) {
             $this->orderMock->expects($this->once())->method('setState');
-            $this->orderMock->expects($this->once())->method('save');
+            $this->orderRepositoryMock->expects($this->once())->method('save');
         } else {
             $this->orderMock->expects($this->never())->method('setState');
-            $this->orderMock->expects($this->never())->method('save');
+            $this->orderRepositoryMock->expects($this->never())->method('save');
         }
 
         $this->setOrderStateAfterPaymentObserver->execute($this->observerMock);
@@ -132,7 +136,11 @@ class SetOrderStateAfterPaymentObserverTest extends AbstractAdyenTestCase
         $eventObserver = $this->createMock(Observer::class);
         $eventObserver->method('getData')->with('payment')->willReturn($payment);
 
-        $observer = new SetOrderStateAfterPaymentObserver($statusResolver, $configHelperMock);
+        $observer = new SetOrderStateAfterPaymentObserver(
+            $statusResolver,
+            $configHelperMock,
+            $this->orderRepositoryMock
+        );
 
         $observer->execute($eventObserver);
     }

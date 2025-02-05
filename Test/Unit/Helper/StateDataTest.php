@@ -12,36 +12,44 @@
 namespace Adyen\Payment\Test\Unit\Helper;
 
 use Adyen\Payment\Helper\StateData;
+use Adyen\Payment\Helper\Util\CheckoutStateDataValidator;
+use Adyen\Payment\Logger\AdyenLogger;
 use Adyen\Payment\Model\ResourceModel\StateData as StateDataResourceModel;
 use Adyen\Payment\Model\ResourceModel\StateData\Collection as StateDataCollection;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Adyen\Payment\Model\StateDataFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class StateDataTest extends AbstractAdyenTestCase
 {
-    private $stateDataHelper;
-    private $stateDataCollectionMock;
-    private $stateDataFactoryMock;
-    private $stateDataResourceModelMock;
+    private StateData $stateDataHelper;
+    private StateDataCollection|MockObject $stateDataCollectionMock;
+    private StateDataFactory|MockObject $stateDataFactoryMock;
+    private StateDataResourceModel|MockObject $stateDataResourceModelMock;
+    private CheckoutStateDataValidator|MockObject $checkoutStateDataValidatorMock;
+    private AdyenLogger|MockObject $adyenLoggerMock;
 
     protected function setUp(): void
     {
-        $this->objectManager = new ObjectManager($this);
         $this->stateDataCollectionMock = $this->createMock(StateDataCollection::class);
         $this->stateDataResourceModelMock = $this->createMock(StateDataResourceModel::class);
+        $this->checkoutStateDataValidatorMock = $this->createMock(CheckoutStateDataValidator::class);
+        $this->adyenLoggerMock = $this->createMock(AdyenLogger::class);
 
         $stateDataMock = $this->createMock(\Adyen\Payment\Model\StateData::class);
 
         $this->stateDataFactoryMock = $this->createGeneratedMock(StateDataFactory::class, ['create']);
         $this->stateDataFactoryMock->method('create')->willReturn($stateDataMock);
 
-        $this->stateDataHelper = $this->objectManager->getObject(StateData::class, [
-            'stateDataCollection' => $this->stateDataCollectionMock,
-            'stateDataResourceModel' => $this->stateDataResourceModelMock,
-            'stateDataFactory' => $this->stateDataFactoryMock
-        ]);
+        $this->stateDataHelper = new StateData(
+            $this->stateDataCollectionMock,
+            $this->stateDataFactoryMock,
+            $this->stateDataResourceModelMock,
+            $this->checkoutStateDataValidatorMock,
+            $this->adyenLoggerMock
+        );
     }
 
     public function testSaveStateDataSuccessful()

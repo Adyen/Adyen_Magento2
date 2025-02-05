@@ -15,7 +15,8 @@ namespace Adyen\Payment\Model\Resolver;
 
 use Adyen\Payment\Exception\GraphQlAdyenException;
 use Adyen\Payment\Helper\GiftcardPayment;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Query\ResolverInterface;
@@ -25,34 +26,15 @@ use Magento\Framework\Serialize\Serializer\Json;
 class GetAdyenRedeemedGiftcards implements ResolverInterface
 {
     /**
-     * @var GiftcardPayment
-     */
-    private GiftcardPayment $giftcardPayment;
-
-    /**
-     * @var Json
-     */
-    private Json $jsonSerializer;
-
-    /**
-     * @var QuoteIdMaskFactory
-     */
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
-    /**
      * @param GiftcardPayment $giftcardPayment
      * @param Json $jsonSerializer
-     * @param QuoteIdMaskFactory $quoteIdMaskFactory
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
      */
     public function __construct(
-        GiftcardPayment $giftcardPayment,
-        Json            $jsonSerializer,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->giftcardPayment = $giftcardPayment;
-        $this->jsonSerializer = $jsonSerializer;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        private readonly GiftcardPayment $giftcardPayment,
+        private readonly Json $jsonSerializer,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param Field $field
@@ -63,6 +45,7 @@ class GetAdyenRedeemedGiftcards implements ResolverInterface
      * @return array
      * @throws GraphQlAdyenException
      * @throws GraphQlInputException
+     * @throws NoSuchEntityException
      */
     public function resolve(
         Field       $field,
@@ -75,10 +58,7 @@ class GetAdyenRedeemedGiftcards implements ResolverInterface
             throw new GraphQlInputException(__('Required parameter "cartId" is missing'));
         }
 
-        $cartId = $args['cartId'];
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
-        $quoteId = (int)$quoteId;
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($args['cartId']);
 
         try {
             $redeemedGiftcardsJson = $this->giftcardPayment->fetchRedeemedGiftcards($quoteId);

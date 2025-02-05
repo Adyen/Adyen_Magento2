@@ -5,28 +5,28 @@ namespace Adyen\Payment\Test\Unit\Model\Api;
 use Adyen\Payment\Model\Api\GuestAdyenPaymentMethodManagement;
 use Adyen\Payment\Helper\PaymentMethods;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
-use Magento\Quote\Model\QuoteIdMask;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class GuestAdyenPaymentMethodManagementTest extends AbstractAdyenTestCase
 {
-    /** @var QuoteIdMaskFactory|\PHPUnit\Framework\MockObject\MockObject */
-    private $quoteIdMaskFactoryMock;
+    /** @var MaskedQuoteIdToQuoteIdInterface|MockObject */
+    private MaskedQuoteIdToQuoteIdInterface|MockObject $maskedQuoteIdToQuoteIdMock;
 
-    /** @var PaymentMethods|\PHPUnit\Framework\MockObject\MockObject */
-    private $paymentMethodsHelperMock;
+    /** @var PaymentMethods|MockObject */
+    private PaymentMethods|MockObject $paymentMethodsHelperMock;
 
     /** @var GuestAdyenPaymentMethodManagement */
-    private $guestAdyenPaymentMethodManagement;
+    private GuestAdyenPaymentMethodManagement $guestAdyenPaymentMethodManagement;
 
     protected function setUp(): void
     {
-        $this->quoteIdMaskFactoryMock = $this->createGeneratedMock(QuoteIdMaskFactory::class, ['create']);
+        $this->maskedQuoteIdToQuoteIdMock = $this->createMock(MaskedQuoteIdToQuoteIdInterface::class);
         $this->paymentMethodsHelperMock = $this->createMock(PaymentMethods::class);
 
         $this->guestAdyenPaymentMethodManagement = new GuestAdyenPaymentMethodManagement(
-            $this->quoteIdMaskFactoryMock,
-            $this->paymentMethodsHelperMock
+            $this->paymentMethodsHelperMock,
+            $this->maskedQuoteIdToQuoteIdMock
         );
     }
 
@@ -39,10 +39,7 @@ class GuestAdyenPaymentMethodManagementTest extends AbstractAdyenTestCase
         $channel = 'Web';
         $expectedPaymentMethods = 'sample_payment_methods';
 
-        $quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, ['load', 'getQuoteId']);
-        $quoteIdMaskMock->method('load')->willReturn($quoteIdMaskMock);
-        $quoteIdMaskMock->method('getQuoteId')->willReturn($quoteId);
-        $this->quoteIdMaskFactoryMock->method('create')->willReturn($quoteIdMaskMock);
+        $this->maskedQuoteIdToQuoteIdMock->expects($this->once())->method('execute')->willReturn($quoteId);
 
         $this->paymentMethodsHelperMock->expects($this->once())
             ->method('getPaymentMethods')

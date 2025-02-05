@@ -21,10 +21,10 @@ class DonationsTest extends WebapiAbstract
 
     private $maskedQuoteId;
 
-
     protected function setUp(): void
     {
         $objectManager = Bootstrap::getObjectManager();
+        /** @phpstan-ignore-next-line */
         $this->getMaskedQuoteIdByReservedOrderId = $objectManager->get(GetMaskedQuoteIdByReservedOrderId::class);
         $this->customerTokenService = $objectManager->get(CustomerTokenServiceInterface::class);
     }

@@ -15,6 +15,7 @@ class CheckoutPaymentCommentHistoryHandlerTest extends AbstractAdyenTestCase
     private CheckoutPaymentCommentHistoryHandler $checkoutPaymentCommentHistoryHandler;
     private Payment|MockObject $paymentMock;
     private Order|MockObject $orderMock;
+    private PaymentDataObject $paymentDataObject;
     private array $handlingSubject;
 
     public function setUp() : void

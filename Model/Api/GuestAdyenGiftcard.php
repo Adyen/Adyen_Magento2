@@ -14,25 +14,28 @@ namespace Adyen\Payment\Model\Api;
 
 use Adyen\Payment\Api\GuestAdyenGiftcardInterface;
 use Adyen\Payment\Helper\GiftcardPayment;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 
 class GuestAdyenGiftcard implements GuestAdyenGiftcardInterface
 {
-    private GiftcardPayment $giftcardPaymentHelper;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-
+    /**
+     * @param GiftcardPayment $giftcardPaymentHelper
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        GiftcardPayment $giftcardPaymentHelper,
-        QuoteIdMaskFactory $quoteIdMaskFactory
-    ) {
-        $this->giftcardPaymentHelper = $giftcardPaymentHelper;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-    }
+        private readonly GiftcardPayment $giftcardPaymentHelper,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
+    /**
+     * @param string $cartId
+     * @return string
+     * @throws NoSuchEntityException
+     */
     public function getRedeemedGiftcards(string $cartId): string
     {
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
 
         return $this->giftcardPaymentHelper->fetchRedeemedGiftcards($quoteId);
     }

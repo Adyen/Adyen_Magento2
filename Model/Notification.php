@@ -13,6 +13,7 @@ namespace Adyen\Payment\Model;
 
 use Adyen\Payment\Api\Data\NotificationInterface;
 use DateTime;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Model\Context;
@@ -74,7 +75,14 @@ class Notification extends AbstractModel implements NotificationInterface
      */
     public function isDuplicate($done = null): bool
     {
-        $result = $this->getResource()->getNotification(
+        /*
+         * Load resource model Adyen\Payment\Model\ResourceModel\Notification manually
+         * as Magento\Framework\Model\AbstractModel::_getResource() method has been deprecated.
+         * ObjectManager has been used due to dependencies not being loaded timely manner on entity classes.
+         */
+        $notificationResourceModel = ObjectManager::getInstance()->get($this->getResourceName());
+
+        $result = $notificationResourceModel->getNotification(
             $this->getPspreference(),
             $this->getEventCode(),
             $this->getSuccess(),

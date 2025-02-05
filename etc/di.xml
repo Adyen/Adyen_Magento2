@@ -1699,6 +1699,12 @@
     <preference for="Adyen\Payment\Api\Data\NotificationInterface" type="Adyen\Payment\Model\Notification" />
     <preference for="Adyen\Payment\Api\AdyenPaymentMethodsBalanceInterface" type="Adyen\Payment\Model\Api\AdyenPaymentMethodsBalance" />
     <preference for="Adyen\Payment\Api\TokenDeactivateInterface" type="Adyen\Payment\Model\Api\TokenDeactivate" />
+    <preference for="Adyen\Payment\Api\Repository\AdyenInvoiceRepositoryInterface"
+                type="Adyen\Payment\Model\AdyenInvoiceRepository" />
+    <preference for="Adyen\Payment\Api\Repository\AdyenCreditmemoRepositoryInterface"
+                type="Adyen\Payment\Model\AdyenCreditmemoRepository" />
+    <preference for="Adyen\Payment\Api\Repository\AdyenOrderPaymentRepositoryInterface"
+                type="Adyen\Payment\Model\AdyenOrderPaymentRepository" />
     <type name="Magento\Vault\Api\PaymentTokenRepositoryInterface">
         <plugin name="AdyenPaymentVaultDeleteToken" type="Adyen\Payment\Plugin\PaymentVaultDeleteToken" sortOrder="10" />
     </type>

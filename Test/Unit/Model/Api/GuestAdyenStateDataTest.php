@@ -15,35 +15,25 @@ use Adyen\Payment\Helper\StateData;
 use Adyen\Payment\Model\Api\GuestAdyenStateData;
 use Adyen\Payment\Test\Unit\AbstractAdyenTestCase;
 use Magento\Framework\Exception\InputException;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Magento\Quote\Model\QuoteIdMask;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class GuestAdyenStateDataTest extends AbstractAdyenTestCase
 {
-    private $objectManager;
-    private $stateDataHelperMock;
-    private $quoteIdMaskFactoryMock;
-    private $quoteIdMaskMock;
-    private $guestAdyenStateDataModel;
+    private GuestAdyenStateData $guestAdyenStateDataModel;
+    private StateData|MockObject $stateDataHelperMock;
+    private MaskedQuoteIdToQuoteIdInterface|MockObject $maskedQuoteIdToQuoteIdMock;
 
     protected function setUp(): void
     {
-        $this->objectManager = new ObjectManager($this);
-
-        $this->quoteIdMaskFactoryMock = $this->createGeneratedMock(QuoteIdMaskFactory::class, [
-            'create'
-        ]);
+        $this->maskedQuoteIdToQuoteIdMock = $this->createMock(MaskedQuoteIdToQuoteIdInterface::class);
         $this->stateDataHelperMock = $this->createMock(StateData::class);
 
-        $this->quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, ['load', 'getQuoteId']);
-        $this->quoteIdMaskMock->method('load')->willReturn($this->quoteIdMaskMock);
-        $this->quoteIdMaskMock->method('getQuoteId')->willReturn(1);
-
-        $this->guestAdyenStateDataModel = $this->objectManager->getObject(GuestAdyenStateData::class, [
-            'quoteIdMaskFactory' => $this->quoteIdMaskFactoryMock,
-            'stateDataHelper' => $this->stateDataHelperMock
-        ]);
+        $this->guestAdyenStateDataModel = new GuestAdyenStateData(
+            $this->stateDataHelperMock,
+            $this->maskedQuoteIdToQuoteIdMock
+        );
     }
 
     public function testSaveSuccessful()
@@ -51,10 +41,11 @@ class GuestAdyenStateDataTest extends AbstractAdyenTestCase
         $stateData = '{"stateData":"dummyData"}';
         $cartId = 'ABC123456789';
 
+        $this->maskedQuoteIdToQuoteIdMock->method('execute')->willReturn(1);
+
         $stateDataMock = $this->createMock(\Adyen\Payment\Model\StateData::class);
         $stateDataMock->method('getEntityId')->willReturn(1);
 
-        $this->quoteIdMaskFactoryMock->method('create')->willReturn($this->quoteIdMaskMock);
         $this->stateDataHelperMock->expects($this->once())->method('saveStateData')->willReturn($stateDataMock);
 
         $this->guestAdyenStateDataModel->save($stateData, $cartId);
@@ -65,7 +56,8 @@ class GuestAdyenStateDataTest extends AbstractAdyenTestCase
         $stateDataId = 1;
         $cartId = 'ABC123456789';
 
-        $this->quoteIdMaskFactoryMock->method('create')->willReturn($this->quoteIdMaskMock);
+        $this->maskedQuoteIdToQuoteIdMock->method('execute')->willReturn(1);
+
         $this->stateDataHelperMock->expects($this->once())->method('removeStateData');
         $this->guestAdyenStateDataModel->remove($stateDataId, $cartId);
     }
@@ -77,11 +69,8 @@ class GuestAdyenStateDataTest extends AbstractAdyenTestCase
         $stateData = '{"stateData":"dummyData"}';
         $cartId = '';
 
-        $quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, ['load', 'getQuoteId']);
-        $quoteIdMaskMock->method('load')->willReturn($quoteIdMaskMock);
-        $quoteIdMaskMock->method('getQuoteId')->willReturn(null);
+        $this->maskedQuoteIdToQuoteIdMock->method('execute')->willThrowException(new NoSuchEntityException());
 
-        $this->quoteIdMaskFactoryMock->method('create')->willReturn($quoteIdMaskMock);
 
         $this->guestAdyenStateDataModel->save($stateData, $cartId);
     }

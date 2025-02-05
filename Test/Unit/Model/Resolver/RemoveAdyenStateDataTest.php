@@ -20,42 +20,32 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\GraphQl\Config\Element\Field;
 use Magento\Framework\GraphQl\Exception\GraphQlInputException;
 use Magento\Framework\GraphQl\Schema\Type\ResolveInfo;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Magento\Quote\Model\QuoteIdMask;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
 {
-    private $removeAdyenStateDataResolver;
-    private $adyenStateDataHelperMock;
-    private $quoteIdMaskFactoryMock;
-    private $quoteIdMaskMock;
-    private $fieldMock;
-    private $contextMock;
-    private $infoMock;
+    private RemoveAdyenStateData $removeAdyenStateDataResolver;
+    private AdyenStateData|MockObject $adyenStateDataHelperMock;
+    private Field|MockObject $fieldMock;
+    private ContextInterface|MockObject $contextMock;
+    private ResolveInfo|MockObject $infoMock;
+    private MaskedQuoteIdToQuoteIdInterface|MockObject $maskedQuoteIdToQuoteIdMock;
 
     public function setUp(): void
     {
-        $this->objectManager = new ObjectManager($this);
-
         $this->adyenStateDataHelperMock = $this->createMock(AdyenStateData::class);
         $this->fieldMock = $this->createMock(Field::class);
         $this->contextMock = $this->createMock(ContextInterface::class);
         $this->infoMock = $this->createMock(ResolveInfo::class);
 
-        $this->quoteIdMaskMock = $this->createGeneratedMock(QuoteIdMask::class, ['load', 'getQuoteId']);
-        $this->quoteIdMaskMock->method('load')->willReturn($this->quoteIdMaskMock);
-        $this->quoteIdMaskMock->method('getQuoteId')->willReturn(1);
+        $this->maskedQuoteIdToQuoteIdMock = $this->createMock(MaskedQuoteIdToQuoteIdInterface::class);
+        $this->maskedQuoteIdToQuoteIdMock->method('execute')->willReturn(1);
 
-        $this->quoteIdMaskFactoryMock = $this->createGeneratedMock(QuoteIdMaskFactory::class, [
-            'create'
-        ]);
-        $this->quoteIdMaskFactoryMock->method('create')->willReturn($this->quoteIdMaskMock);
-
-        $this->removeAdyenStateDataResolver = $this->objectManager->getObject(RemoveAdyenStateData::class, [
-            'adyenStateData' => $this->adyenStateDataHelperMock,
-            'quoteIdMaskFactory' => $this->quoteIdMaskFactoryMock
-        ]);
+        $this->removeAdyenStateDataResolver = new RemoveAdyenStateData(
+            $this->adyenStateDataHelperMock,
+            $this->maskedQuoteIdToQuoteIdMock
+        );
     }
 
     public function testResolve()
@@ -64,7 +54,7 @@ class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
 
         $args = [
             'stateDataId' => $stateDataId,
-            'cartId' => 1
+            'cartId' => '1'
         ];
 
         $this->adyenStateDataHelperMock->expects($this->once())->method('remove')->willReturn(true);
@@ -89,12 +79,12 @@ class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
 
         $args = [
             'stateDataId' => $stateDataId,
-            'cartId' => 1
+            'cartId' => '1'
         ];
 
         $this->adyenStateDataHelperMock->expects($this->once())->method('remove')->willReturn(false);
 
-        $result = $this->removeAdyenStateDataResolver->resolve(
+        $this->removeAdyenStateDataResolver->resolve(
             $this->fieldMock,
             $this->contextMock,
             $this->infoMock,
@@ -109,7 +99,7 @@ class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
 
         $args = [
             'stateDataId' => 1,
-            'cartId' => 1
+            'cartId' => '1'
         ];
 
         $this->adyenStateDataHelperMock->expects($this->once())
@@ -156,7 +146,7 @@ class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
         return [
             [
                 'stateDataId' => '',
-                'cartId' => 1
+                'cartId' => '1'
             ],
             [
                 'stateDataId' => 1,
@@ -168,7 +158,7 @@ class RemoveAdyenStateDataTest extends AbstractAdyenTestCase
             ],
             [
                 'stateDataId' => null,
-                'cartId' => 1
+                'cartId' => '1'
             ]
         ];
     }

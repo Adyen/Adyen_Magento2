@@ -21,6 +21,7 @@ use DateTimeZone;
 use Exception;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Sales\Api\Data\OrderPaymentExtensionInterface;
+use Magento\Sales\Api\Data\OrderPaymentExtensionInterfaceFactory;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Vault\Api\Data\PaymentTokenFactoryInterface;
@@ -60,6 +61,7 @@ class Vault
     private Config $config;
     private PaymentMethods $paymentMethodsHelper;
     private StateData $stateData;
+    private OrderPaymentExtensionInterfaceFactory $paymentExtensionFactory;
 
     public function __construct(
         AdyenLogger $adyenLogger,

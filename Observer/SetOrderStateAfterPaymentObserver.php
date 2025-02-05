@@ -20,33 +20,18 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Model\MethodInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Order\StatusResolver;
 
 class SetOrderStateAfterPaymentObserver implements ObserverInterface
 {
-    /**
-     * @var StatusResolver
-     */
-    private StatusResolver $statusResolver;
-
-    /**
-     * @var Config
-     */
-    private Config $configHelper;
-
-    /**
-     * @param StatusResolver $statusResolver
-     * @param Config $configHelper
-     */
     public function __construct(
-        StatusResolver $statusResolver,
-        Config $configHelper
-    ) {
-        $this->statusResolver = $statusResolver;
-        $this->configHelper = $configHelper;
-    }
+        private readonly StatusResolver $statusResolver,
+        private readonly Config $configHelper,
+        private readonly OrderRepositoryInterface $orderRepository
+    ) { }
 
     /**
      * @throws Exception
@@ -85,7 +70,7 @@ class SetOrderStateAfterPaymentObserver implements ObserverInterface
             $order->setStatus($status);
             $message = __("Pos payment initiated and waiting for payment");
             $order->addCommentToStatusHistory($message, $status);
-            $order->save();
+            $this->orderRepository->save($order);
         }
     }
 
@@ -126,7 +111,7 @@ class SetOrderStateAfterPaymentObserver implements ObserverInterface
                 );
 
                 $order->addCommentToStatusHistory($message, $status);
-                $order->save();
+                $this->orderRepository->save($order);
             }
         }
     }

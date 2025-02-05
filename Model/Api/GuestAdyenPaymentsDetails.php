@@ -16,24 +16,21 @@ use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\NotFoundException;
-use Magento\Quote\Model\QuoteIdMaskFactory;
+use Magento\Quote\Model\MaskedQuoteIdToQuoteIdInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 
 class GuestAdyenPaymentsDetails implements GuestAdyenPaymentsDetailsInterface
 {
-    private OrderRepositoryInterface $orderRepository;
-    private QuoteIdMaskFactory $quoteIdMaskFactory;
-    private AdyenPaymentsDetails $adyenPaymentsDetails;
-
+    /**
+     * @param OrderRepositoryInterface $orderRepository
+     * @param AdyenPaymentsDetails $adyenPaymentsDetails
+     * @param MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+     */
     public function __construct(
-        OrderRepositoryInterface $orderRepository,
-        QuoteIdMaskFactory $quoteIdMaskFactory,
-        AdyenPaymentsDetails $adyenPaymentsDetails
-    ) {
-        $this->orderRepository = $orderRepository;
-        $this->quoteIdMaskFactory = $quoteIdMaskFactory;
-        $this->adyenPaymentsDetails = $adyenPaymentsDetails;
-    }
+        private readonly OrderRepositoryInterface $orderRepository,
+        private readonly AdyenPaymentsDetails $adyenPaymentsDetails,
+        private readonly MaskedQuoteIdToQuoteIdInterface $maskedQuoteIdToQuoteId
+    ) { }
 
     /**
      * @param string $payload
@@ -48,9 +45,7 @@ class GuestAdyenPaymentsDetails implements GuestAdyenPaymentsDetailsInterface
     public function initiate(string $payload, string $orderId, string $cartId): string
     {
         $order = $this->orderRepository->get(intval($orderId));
-
-        $quoteIdMask = $this->quoteIdMaskFactory->create()->load($cartId, 'masked_id');
-        $quoteId = $quoteIdMask->getQuoteId();
+        $quoteId = $this->maskedQuoteIdToQuoteId->execute($cartId);
 
         if ($order->getQuoteId() != $quoteId) {
             throw new NotFoundException(

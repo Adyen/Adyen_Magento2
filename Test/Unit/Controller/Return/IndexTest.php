@@ -26,6 +26,8 @@ use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface as MessageManagerInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\OrderFactory;
@@ -54,6 +56,8 @@ class IndexTest extends AbstractAdyenTestCase
     private $configHelperMock;
     private $paymentsDetailsHelperMock;
     private $paymentResponseHandlerMock;
+    private $cartRepositoryMock;
+    private $orderRepositoryMock;
 
     const STORE_ID = 1;
 
@@ -69,6 +73,8 @@ class IndexTest extends AbstractAdyenTestCase
         $this->configHelperMock = $this->createMock(Config::class);
         $this->paymentsDetailsHelperMock = $this->createMock(PaymentsDetails::class);
         $this->paymentResponseHandlerMock = $this->createMock(PaymentResponseHandler::class);
+        $this->cartRepositoryMock = $this->createMock(CartRepositoryInterface::class);
+        $this->orderRepositoryMock = $this->createMock(OrderRepositoryInterface::class);
 
         // Extra mock objects and methods
         $this->messageManagerMock = $this->createMock(MessageManagerInterface::class);
@@ -114,7 +120,9 @@ class IndexTest extends AbstractAdyenTestCase
             $this->quoteHelperMock,
             $this->configHelperMock,
             $this->paymentsDetailsHelperMock,
-            $this->paymentResponseHandlerMock
+            $this->paymentResponseHandlerMock,
+            $this->cartRepositoryMock,
+            $this->orderRepositoryMock
         );
     }
 
