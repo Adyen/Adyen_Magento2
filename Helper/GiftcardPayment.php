@@ -108,12 +108,21 @@ class GiftcardPayment
         $totalBalance = 0;
 
         foreach ($stateDataArray as $stateData) {
-            $stateData = json_decode($stateData['state_data'], true);
+            $state = $stateData['state_data'] ?? null;
+            if (!is_string($state)) {
+                continue;
+            }
+
+            $stateData = json_decode($state, true);
+            $giftCardValue = $stateData['giftcard']['balance']['value'] ?? null;
+            if (!is_numeric($giftCardValue)) {
+                continue;
+            }
 
             if (isset($stateData['paymentMethod']['type']) ||
                 isset($stateData['paymentMethod']['brand']) ||
                 $stateData['paymentMethod']['type'] === 'giftcard') {
-                $totalBalance += $stateData['giftcard']['balance']['value'];
+                $totalBalance += $giftCardValue;
             }
         }
 
