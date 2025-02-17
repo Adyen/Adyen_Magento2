@@ -56,6 +56,17 @@ class VaultMigration implements DataPatchInterface
 
     private function migrateBillingAgreementsToVault(ModuleDataSetupInterface $setup): void
     {
+        if (!$setup->tableExists('paypal_billing_agreement')) {
+            $this->adyenLogger->addAdyenInfoLog('Table paypal_billing_agreement does not exist, skipping migration');
+            return;
+        }
+
+        $columns = $setup->getConnection()->describeTable('paypal_billing_agreement');
+        if (!isset($columns['method_code']) || !isset($columns['status'])) {
+            $this->adyenLogger->addAdyenInfoLog('Columns method_code and status do not exist, skipping migration');
+            return;
+        }
+
         $paypalTable = $setup->getTable('paypal_billing_agreement');
         $connection = $setup->getConnection();
 
