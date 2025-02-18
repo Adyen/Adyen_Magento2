@@ -15,7 +15,6 @@ use Adyen\AdyenException;
 use Adyen\Client;
 use Adyen\ConnectionException;
 use Adyen\Model\Checkout\PaymentRequest;
-use Adyen\Model\Checkout\PaymentResponse as CheckoutPaymentResponse;
 use Adyen\Payment\Helper\Data;
 use Adyen\Payment\Helper\GiftcardPayment;
 use Adyen\Payment\Helper\Idempotency;

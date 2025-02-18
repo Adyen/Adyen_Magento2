@@ -206,6 +206,7 @@
                 <supports_manual_capture>1</supports_manual_capture>
                 <supports_auto_capture>1</supports_auto_capture>
                 <is_wallet>0</is_wallet>
+                <requires_line_items>1</requires_line_items>
                 <group>adyen-alternative-payment-method</group>
             </adyen_paypal>
             <adyen_paypal_vault>

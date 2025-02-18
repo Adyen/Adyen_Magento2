@@ -1117,6 +1117,7 @@
                 <item name="transaction" xsi:type="string">Adyen\Payment\Gateway\Request\CheckoutDataBuilder</item>
                 <item name="header" xsi:type="string">Adyen\Payment\Gateway\Request\Header\HeaderDataBuilder</item>
                 <item name="company" xsi:type="string">Adyen\Payment\Gateway\Request\CompanyDataBuilder</item>
+                <item name="line_items" xsi:type="string">Adyen\Payment\Gateway\Request\LineItemsDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>
@@ -1160,6 +1161,7 @@
                 <item name="header" xsi:type="string">Adyen\Payment\Gateway\Request\Header\HeaderDataBuilder</item>
                 <item name="giftcard" xsi:type="string">Adyen\Payment\Gateway\Request\GiftcardDataBuilder</item>
                 <item name="company" xsi:type="string">Adyen\Payment\Gateway\Request\CompanyDataBuilder</item>
+                <item name="line_items" xsi:type="string">Adyen\Payment\Gateway\Request\LineItemsDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>
@@ -1212,6 +1214,7 @@
                 <item name="origin" xsi:type="string">Adyen\Payment\Gateway\Request\OriginDataBuilder</item>
                 <item name="giftcard" xsi:type="string">Adyen\Payment\Gateway\Request\GiftcardDataBuilder</item>
                 <item name="company" xsi:type="string">Adyen\Payment\Gateway\Request\CompanyDataBuilder</item>
+                <item name="line_items" xsi:type="string">Adyen\Payment\Gateway\Request\LineItemsDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>

@@ -66,6 +66,7 @@ class PaymentMethods extends AbstractHelper
     const FUNDING_SOURCE_CREDIT = 'credit';
 
     const ADYEN_GROUP_ALTERNATIVE_PAYMENT_METHODS = 'adyen-alternative-payment-method';
+    const CONFIG_FIELD_REQUIRES_LINE_ITEMS = 'requires_line_items';
     const CONFIG_FIELD_IS_OPEN_INVOICE = 'is_open_invoice';
 
     const VALID_CHANNELS = ["iOS", "Android", "Web"];
@@ -1080,5 +1081,19 @@ class PaymentMethods extends AbstractHelper
     public function isOpenInvoice(MethodInterface $paymentMethodInstance): bool
     {
         return boolval($paymentMethodInstance->getConfigData(self::CONFIG_FIELD_IS_OPEN_INVOICE));
+    }
+
+    /**
+     * Checks the requirement of line items for the given payment method
+     *
+     * @param MethodInterface $paymentMethodInstance
+     * @return bool
+     */
+    public function getRequiresLineItems(MethodInterface $paymentMethodInstance): bool
+    {
+        $isOpenInvoice = $this->isOpenInvoice($paymentMethodInstance);
+        $requiresLineItemsConfig = boolval($paymentMethodInstance->getConfigData(self::CONFIG_FIELD_REQUIRES_LINE_ITEMS));
+
+        return ($isOpenInvoice || $requiresLineItemsConfig);
     }
 }

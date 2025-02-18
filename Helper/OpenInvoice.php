@@ -22,6 +22,9 @@ use Magento\Quote\Model\Quote;
 
 class OpenInvoice
 {
+    const ITEM_CATEGORY_DIGITAL_GOODS = 'DIGITAL_GOODS';
+    const ITEM_CATEGORY_PHYSICAL_GOODS = 'PHYSICAL_GOODS';
+
     protected Data $adyenHelper;
     protected CartRepositoryInterface $cartRepository;
     protected ChargedCurrency $chargedCurrency;
@@ -175,10 +178,15 @@ class OpenInvoice
         return [
             'id' => $product ? $product->getId() : $item->getProductId(),
             'amountIncludingTax' => $formattedPriceIncludingTax,
+            'amountExcludingTax' => $formattedPriceIncludingTax - $formattedTaxAmount,
             'taxAmount' => $formattedTaxAmount,
-            'description' => $item->getName(),
-            'quantity' => (int) ($qty ?? $item->getQty()),
             'taxPercentage' => $formattedTaxPercentage,
+            'description' => $item->getName(),
+            'sku' => $item->getSku(),
+            'itemCategory' => $item->getIsVirtual() ?
+                self::ITEM_CATEGORY_DIGITAL_GOODS :
+                self::ITEM_CATEGORY_PHYSICAL_GOODS,
+            'quantity' => (int) ($qty ?? $item->getQty()),
             'productUrl' => $product ? $product->getUrlModel()->getUrl($product) : '',
             'imageUrl' => $this->getImageUrl($item)
         ];

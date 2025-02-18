@@ -231,6 +231,8 @@ class CheckoutDataBuilder implements BuilderInterface
     }
 
     /**
+     * @deprecated Use Adyen\Payment\Helper\OpenInvoice::getOpenInvoiceDataForOrder() instead.
+     *
      * @param Order $order
      *
      * @return array
