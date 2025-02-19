@@ -302,6 +302,9 @@
     <event name="payment_method_assign_data_adyen_dana">
         <observer name="adyen_dana_gateway_data_assign" instance="Adyen\Payment\Observer\AdyenPaymentMethodDataAssignObserver" />
     </event>
+    <event name="payment_method_adyen_analytics">
+        <observer name="adyen_analytics_observer" instance="Adyen\Payment\Observer\ProcessAnalyticsEvent" />
+     </event>
     <event name="payment_method_assign_data_adyen_kcp_naverpay">
         <observer name="adyen_kcp_naverpay_gateway_data_assign" instance="Adyen\Payment\Observer\AdyenPaymentMethodDataAssignObserver" />
     </event>

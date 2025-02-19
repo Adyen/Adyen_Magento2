@@ -1690,6 +1690,13 @@
             </argument>
         </arguments>
     </type>
+    <type name="Adyen\Payment\Api\Data\AdyenAnalyticsInterface">
+        <arguments>
+            <argument name="instance" xsi:type="string">Adyen\Payment\Model\AdyenAnalytics</argument>
+        </arguments>
+    </type>
+    <preference for="Adyen\Payment\Api\Data\AdyenAnalyticsInterface" type="Adyen\Payment\Model\AdyenAnalytics"/>
+    <preference for="Adyen\Payment\Api\AdyenAnalyticsRepositoryInterface" type="Adyen\Payment\Model\AdyenAnalyticsRepository"/>
     <preference for="Adyen\Payment\Api\GuestAdyenPaymentMethodManagementInterface" type="Adyen\Payment\Model\Api\GuestAdyenPaymentMethodManagement" />
     <preference for="Adyen\Payment\Api\AdyenPaymentMethodManagementInterface" type="Adyen\Payment\Model\Api\AdyenPaymentMethodManagement" />
     <preference for="Adyen\Payment\Api\AdyenPaymentsDetailsInterface" type="Adyen\Payment\Model\Api\AdyenPaymentsDetails" />

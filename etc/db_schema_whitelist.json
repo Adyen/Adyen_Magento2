@@ -110,5 +110,18 @@
         "constraint": {
             "PRIMARY": true
         }
+    },
+    "adyen_analytics": {
+        "columns": {
+            "id": {},
+            "checkoutAttemptId": {},
+            "eventType": {},
+            "topic": {},
+            "message": {},
+            "errorCount": {},
+            "done": {},
+            "createdAt": {},
+            "updatedAt": {}
+        }
     }
 }

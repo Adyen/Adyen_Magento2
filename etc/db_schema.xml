@@ -127,4 +127,18 @@
     </constraint>
     <constraint xsi:type="foreign" referenceId="ADYEN_CREDITMEMO_ADYEN_ORDER_PAYMENT_ID_ADYEN_ORDER_PAYMENT_ENTITY_ID" table="adyen_creditmemo" column="adyen_order_payment_id" referenceTable="adyen_order_payment" referenceColumn="entity_id" onDelete="CASCADE"/>
   </table>
+  <table name="adyen_analytics" resource="default" engine="innodb" comment="Adyen Analytics Event Queue">
+    <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
+    <column xsi:type="varchar" name="checkoutAttemptId" length="255" nullable="false" comment="Checkout Attempt ID"/>
+    <column xsi:type="varchar" name="eventType" length="255" nullable="false" comment="Event Type"/>
+    <column xsi:type="varchar" name="topic" length="255" nullable="false" comment="Event Topic"/>
+    <column xsi:type="text" name="message" nullable="false" comment="Message"/>
+    <column xsi:type="int" name="errorCount" nullable="false" default="0" comment="Error Count"/>
+    <column xsi:type="boolean" name="done" nullable="false" default="0" comment="Done"/>
+    <column xsi:type="timestamp" name="createdAt" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+    <column xsi:type="timestamp" name="updatedAt" nullable="true" on_update="true" comment="Updated At"/>
+    <constraint xsi:type="primary" referenceId="PRIMARY">
+      <column name="id"/>
+    </constraint>
+  </table>
 </schema>
