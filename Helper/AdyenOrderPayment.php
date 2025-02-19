@@ -212,6 +212,7 @@ class AdyenOrderPayment extends AbstractHelper
         try {
             $date = new \DateTime();
             $adyenOrderPayment = $this->adyenOrderPaymentFactory->create();
+            $this->orderPaymentResourceModel->load($adyenOrderPayment, $pspReference, 'pspreference');
             $adyenOrderPayment->setPspreference($pspReference);
             $adyenOrderPayment->setMerchantReference($merchantReference);
             $adyenOrderPayment->setPaymentId($payment->getId());
