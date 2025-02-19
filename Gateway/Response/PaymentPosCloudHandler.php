@@ -43,10 +43,30 @@ class PaymentPosCloudHandler implements HandlerInterface
 
     public function handle(array $handlingSubject, array $response)
     {
-        $paymentResponse = $response['SaleToPOIResponse']['PaymentResponse'];
         $paymentDataObject = SubjectReader::readPayment($handlingSubject);
-
         $payment = $paymentDataObject->getPayment();
+        if (!empty($response['async'])) {
+            // Async payment request, save Order
+            $order = $payment->getOrder();
+            $message = __('Pos payment initiated');
+            $order->addCommentToStatusHistory($message);
+            $order->save();
+
+            return;
+        }
+
+        $errorCondition = $response
+            ['SaleToPOIResponse']
+            ['TransactionStatusResponse']
+            ['Response']
+            ['ErrorCondition'] ?? null;
+        if ($errorCondition === 'InProgress') {
+            // Payment in progress
+            return;
+        }
+
+        $paymentResponse = $response['SaleToPOIResponse']['PaymentResponse']
+            ?? $response['SaleToPOIResponse']['TransactionStatusResponse']['RepeatedMessageResponse']['RepeatedResponseMessageBody']['PaymentResponse'];
 
         // set transaction not to processing by default wait for notification
         $payment->setIsTransactionPending(true);
@@ -92,6 +112,9 @@ class PaymentPosCloudHandler implements HandlerInterface
         // do not close transaction so you can do a cancel() and void
         $payment->setIsTransactionClosed(false);
         $payment->setShouldCloseParentTransaction(false);
+
+        // Transaction is final
+        $payment->unsAdditionalInformation('pos_request');
 
         if ($resultCode === PaymentResponseHandler::POS_SUCCESS) {
             $order = $payment->getOrder();

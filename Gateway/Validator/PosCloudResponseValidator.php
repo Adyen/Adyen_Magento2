@@ -43,6 +43,23 @@ class PosCloudResponseValidator extends AbstractValidator
 
         $this->adyenLogger->addAdyenDebug(json_encode($response));
 
+        // Do not validate (async) payment requests
+        if (!empty($response['async'])) {
+            // Async payment request
+            return $this->createResult(true, []);
+        }
+
+        // Do not validate in progress status response
+        $errorCondition = $response
+            ['SaleToPOIResponse']
+            ['TransactionStatusResponse']
+            ['Response']
+            ['ErrorCondition'] ?? null;
+        if ($errorCondition === 'InProgress') {
+            // Payment in progress
+            return $this->createResult(true, []);
+        }
+
         // Check for errors
         if (!empty($response['error'])) {
             if (!empty($response['code']) && $response['code'] == CURLE_OPERATION_TIMEOUTED) {
@@ -54,7 +71,8 @@ class PosCloudResponseValidator extends AbstractValidator
             }
         } else {
             // We have a paymentResponse from the terminal
-            $paymentResponse = $response['SaleToPOIResponse']['PaymentResponse'];
+            $paymentResponse = $response['SaleToPOIResponse']['PaymentResponse']
+                ?? $response['SaleToPOIResponse']['TransactionStatusResponse']['RepeatedMessageResponse']['RepeatedResponseMessageBody']['PaymentResponse'];
         }
 
         if (!empty($paymentResponse) && $paymentResponse['Response']['Result'] != 'Success') {

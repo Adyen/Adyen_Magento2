@@ -991,7 +991,7 @@
         <arguments>
             <argument name="requestBuilder" xsi:type="object">AdyenPaymentPosCloudAuthorizeRequest</argument>
             <argument name="transferFactory" xsi:type="object">Adyen\Payment\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">Adyen\Payment\Gateway\Http\Client\TransactionPosCloudSync</argument>
+            <argument name="client" xsi:type="object">Adyen\Payment\Gateway\Http\Client\TransactionPosCloud</argument>
             <argument name="validator" xsi:type="object">PosCloudResponseValidator</argument>
             <argument name="handler" xsi:type="object">AdyenPaymentPosCloudResponseHandlerComposite</argument>
         </arguments>
@@ -1813,7 +1813,7 @@
             <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
         </arguments>
     </type>
-    <type name="Adyen\Payment\Gateway\Http\Client\TransactionPosCloudSync">
+    <type name="Adyen\Payment\Gateway\Http\Client\TransactionPosCloud">
         <arguments>
             <argument name="session" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
         </arguments>

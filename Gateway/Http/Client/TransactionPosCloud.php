@@ -21,7 +21,7 @@ use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-class TransactionPosCloudSync implements ClientInterface
+class TransactionPosCloud implements ClientInterface
 {
     protected int $storeId;
     protected mixed $timeout;
@@ -60,9 +60,16 @@ class TransactionPosCloudSync implements ClientInterface
         $request = $transferObject->getBody();
         $service = $this->adyenHelper->createAdyenPosPaymentService($this->client);
 
-        $this->adyenHelper->logRequest($request, '', '/sync');
+        // Use async for payment requests
+        $sync = empty($request['SaleToPOIRequest']['PaymentRequest']);
+        $this->adyenHelper->logRequest($request, '', $sync ? '/sync' : '/async');
         try {
-            $response = $service->runTenderSync($request);
+            if ($sync) {
+                $response = $service->runTenderSync($request);
+            } else {
+                // Note: Async requests do not have a response
+                $response = $service->runTenderAsync($request) ?? ['async' => true];
+            }
         } catch (AdyenException $e) {
             //Not able to perform a payment
             $this->adyenLogger->addAdyenDebug($response['error'] = $e->getMessage());
