@@ -1,11 +1,11 @@
 # Install N98-Magerun
-n98-magerun2.phar:
-	wget -q https://files.magerun.net/n98-magerun2.phar
-	chmod +x ./n98-magerun2.phar
+build-n98-magerun2:
+	wget -q https://files.magerun.net/n98-magerun2-${N98_MAGERUN_VERSION}.phar
+	chmod +x ./n98-magerun2-${N98_MAGERUN_VERSION}.phar
 
 # Check Magento installation
-sys-check: n98-magerun2.phar
-	./n98-magerun2.phar sys:check
+sys-check: build-n98-magerun2
+	./n98-magerun2-${N98_MAGERUN_VERSION}.phar sys:check
 
 # Install Magento (without starting Apache)
 magento:
@@ -26,7 +26,7 @@ dev-module:
 	bin/magento setup:upgrade
 
 # Configuration
-configure: n98-magerun2.phar
+configure:
 	bin/magento config:set payment/adyen_abstract/demo_mode 1
 	bin/magento adyen:enablepaymentmethods:run
 	bin/magento config:set payment/adyen_abstract/has_holder_name 1
@@ -49,8 +49,8 @@ configure: n98-magerun2.phar
 	bin/magento config:set payment/adyen_abstract/client_key_test "${ADYEN_CLIENT_KEY}"
 	bin/magento config:set payment/adyen_abstract/notification_username 'admin'
 	bin/magento config:set payment/adyen_abstract/payment_methods_active 1
-	./n98-magerun2.phar config:store:set --encrypt payment/adyen_abstract/notification_password '1234'  > /dev/null
-	./n98-magerun2.phar config:store:set --encrypt payment/adyen_abstract/api_key_test "${ADYEN_API_KEY}" > /dev/null
+	./n98-magerun2-${N98_MAGERUN_VERSION}.phar config:store:set --encrypt payment/adyen_abstract/notification_password '1234'  > /dev/null
+	./n98-magerun2-${N98_MAGERUN_VERSION}.phar config:store:set --encrypt payment/adyen_abstract/api_key_test "${ADYEN_API_KEY}" > /dev/null
 
 # Clear cache
 flush:

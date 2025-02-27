@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   db:
     image: mariadb:10.4
@@ -12,7 +10,7 @@ services:
       MARIADB_USER: magento
       MARIADB_PASSWORD: magento
   opensearch:
-    image: bitnami/opensearch:2
+    image: bitnami/opensearch:${OPENSEARCH_VERSION}
     container_name: opensearch-container
     networks:
       - backend
@@ -38,6 +36,8 @@ services:
     environment:
       DB_SERVER: mariadb
       OPENSEARCH_SERVER: opensearch-container
+      OPENSEARCH_VERSION:
+      N98_MAGERUN_VERSION:
       MAGENTO_HOST: magento2.test.com
       VIRTUAL_HOST: magento2.test.com
       COMPOSER_MEMORY_LIMIT: -1

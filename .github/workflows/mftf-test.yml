@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  mftf_job:
+    name: Run Magento Functional Test Framework
     if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
     environment: ${{ (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) && 'external' || 'internal' }}
     strategy:
@@ -20,6 +21,7 @@ jobs:
     env:
       PHP_VERSION: ${{ matrix.php-version }}
       MAGENTO_VERSION: ${{ matrix.magento-version }}
+      OPENSEARCH_VERSION: 2
       ADMIN_USERNAME: ${{ secrets.MAGENTO_ADMIN_USERNAME }}
       ADMIN_PASSWORD: ${{ secrets.MAGENTO_ADMIN_PASSWORD }}
       DONATION_ACCOUNT: ${{secrets.DONATION_ACCOUNT}}

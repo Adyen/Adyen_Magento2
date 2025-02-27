@@ -60,7 +60,7 @@ class Tokenization extends AbstractFieldArray
         );
     }
 
-    private function getEnabledRenderer(): SelectYesNo|BlockInterface
+    private function getEnabledRenderer(): BlockInterface
     {
         if (!$this->enabledRenderer) {
             $this->enabledRenderer = $this->getLayout()->createBlock(

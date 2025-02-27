@@ -13,6 +13,7 @@ OPENSEARCH_SERVER="<will be defined>" \
 OPENSEARCH_PORT=9200 \
 OPENSEARCH_INDEX_PREFIX=magento2 \
 OPENSEARCH_TIMEOUT=15 \
+OPENSEARCH_VERSION="<will be defined>" \
 ADMIN_NAME=admin \
 ADMIN_LASTNAME=admin \
 ADMIN_EMAIL=admin@example.com \
