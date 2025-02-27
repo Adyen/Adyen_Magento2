@@ -46,6 +46,7 @@ use Magento\Framework\Module\ModuleListInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Asset\Repository;
 use Magento\Framework\View\Asset\Source;
+use Magento\Payment\Model\InfoInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order\Payment;
@@ -57,6 +58,7 @@ use Magento\Tax\Model\Config;
 use Magento\Sales\Model\Order;
 use ReflectionClass;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Framework\App\Request\Http;
 
 class DataTest extends AbstractAdyenTestCase
 {
@@ -86,6 +88,7 @@ class DataTest extends AbstractAdyenTestCase
     private $localeHelper;
     private $orderManagement;
     private $orderStatusHistoryFactory;
+    private $request;
 
     public function setUp(): void
     {
@@ -148,6 +151,13 @@ class DataTest extends AbstractAdyenTestCase
             ->with('adyen_credit_cards')
             ->willReturn($this->ccTypesAltData);
 
+        $this->request = $this->createMock(Http::class);
+
+        $this->paymentMock = $this->getMockBuilder(InfoInterface::class)
+            ->disableOriginalConstructor()
+            ->setMethods(null)
+            ->getMock();
+
         // Partial mock builder is being used for mocking the methods in the class being tested.
         $this->dataHelper = $this->getMockBuilder(Data::class)
             ->setMethods(['getModuleVersion'])
@@ -173,7 +183,8 @@ class DataTest extends AbstractAdyenTestCase
                 $this->localeHelper,
                 $this->orderManagement,
                 $this->orderStatusHistoryFactory,
-                $this->configHelper
+                $this->configHelper,
+                $this->request
             ])
             ->getMock();
 
@@ -1055,6 +1066,39 @@ class DataTest extends AbstractAdyenTestCase
         $this->assertEquals($expectedHeaders, $headers);
     }
 
+    public function testBuildRequestHeadersWithFrontendTypeSet(): void
+    {
+        // Mock dependencies as needed
+        $payment = $this->createMock(Payment::class);
+
+        // Set up expectations for the getAdditionalInformation method
+        $payment->method('getAdditionalInformation')
+            ->with(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY)
+            ->willReturn(null);
+
+        $headers = $this->dataHelper->buildRequestHeaders($this->paymentMock);
+
+        $this->assertArrayHasKey(HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE, $headers);
+        $this->assertEquals('headless-rest', $headers[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE]);
+    }
+
+    public function testBuildRequestHeadersWithNullFrontendTypeGraphQL(): void
+    {
+        $this->paymentMock->method('getAdditionalInformation')
+            ->with(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY)
+            ->willReturn(null);
+
+        $this->request->method('getOriginalPathInfo')
+            ->willReturn('/graphql');
+        $this->request->method('getMethod')
+            ->willReturn('POST');
+
+        $headers = $this->dataHelper->buildRequestHeaders($this->paymentMock);
+
+        $this->assertArrayHasKey(HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE, $headers);
+        $this->assertEquals('headless-graphql', $headers[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE]);
+    }
+
     public function testBuildApplicationInfo()
     {
         $expectedApplicationInfo =  new ApplicationInfo();
@@ -1093,14 +1137,14 @@ class DataTest extends AbstractAdyenTestCase
         // Set up expectations for the getAdditionalInformation method
         $payment->method('getAdditionalInformation')
             ->with(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY)
-            ->willReturn('some_frontend_type');
+            ->willReturn('default');
 
         // Call the method under test
         $result = $this->dataHelper->buildRequestHeaders($payment);
 
         // Assert that the 'frontend-type' header is correctly set
         $this->assertArrayHasKey(HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE, $result);
-        $this->assertEquals('some_frontend_type', $result[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE]);
+        $this->assertEquals('default', $result[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE]);
 
         // Assert other headers as needed
     }

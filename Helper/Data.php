@@ -64,6 +64,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Tax\Model\Calculation;
 use Magento\Tax\Model\Config;
+use Magento\Framework\App\Request\Http;
 
 /**
  * @SuppressWarnings(PHPMD.LongVariable)
@@ -199,6 +200,11 @@ class Data extends AbstractHelper
      */
     private $backendHelper;
 
+    /**
+     * @var Http
+     */
+    private Http $request;
+
     public function __construct(
         Context $context,
         EncryptorInterface $encryptor,
@@ -221,7 +227,8 @@ class Data extends AbstractHelper
         Locale $localeHelper,
         OrderManagementInterface $orderManagement,
         HistoryFactory $orderStatusHistoryFactory,
-        ConfigHelper $configHelper
+        ConfigHelper $configHelper,
+        HTTP $request
     ) {
         parent::__construct($context);
         $this->_encryptor = $encryptor;
@@ -245,6 +252,7 @@ class Data extends AbstractHelper
         $this->orderManagement = $orderManagement;
         $this->orderStatusHistoryFactory = $orderStatusHistoryFactory;
         $this->configHelper = $configHelper;
+        $this->request = $request;
     }
 
     /**
@@ -1184,9 +1192,19 @@ class Data extends AbstractHelper
             HeaderDataBuilderInterface::MERCHANT_APPLICATION_VERSION  => $this->getModuleVersion()
         ];
 
-        if(isset($payment) && !is_null($payment->getAdditionalInformation(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY))) {
-            $headers[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE] =
-                $payment->getAdditionalInformation(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY);
+        if (isset($payment)) {
+            $frontendType = $payment->getAdditionalInformation(HeaderDataBuilderInterface::ADDITIONAL_DATA_FRONTEND_TYPE_KEY);
+            if (is_null($frontendType)) {
+                // Check the request URI
+                $requestPath = $this->request->getOriginalPathInfo();
+                $requestMethod = $this->request->getMethod();
+                if ($requestPath === '/graphql' && $requestMethod === 'POST') {
+                    $frontendType = 'headless-graphql';
+                } else {
+                    $frontendType = 'headless-rest';
+                }
+            }
+            $headers[HeaderDataBuilderInterface::EXTERNAL_PLATFORM_FRONTEND_TYPE] = $frontendType;
         }
 
         return $headers;
