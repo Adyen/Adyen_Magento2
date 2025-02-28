@@ -127,9 +127,6 @@ class BeforeShipmentObserverTest extends AbstractAdyenTestCase
 
         $this->paymentMock->method('getMethod')->willReturn($randomPaymentMethod);
         $this->paymentMock->method('getMethodInstance')->willReturn($paymentMethodInstanceMock);
-        $this->paymentMock->method('getAdditionalInformation')
-            ->with(AdyenPaymentMethodDataAssignObserver::BRAND_CODE)
-            ->willReturn('klarna');
 
         $this->configHelperMock->method('getConfigData')
             ->with('capture_for_openinvoice', BeforeShipmentObserver::XML_ADYEN_ABSTRACT_PREFIX, 1)
@@ -154,9 +151,6 @@ class BeforeShipmentObserverTest extends AbstractAdyenTestCase
 
         $this->paymentMock->method('getMethod')->willReturn($randomPaymentMethod);
         $this->paymentMock->method('getMethodInstance')->willReturn($paymentMethodInstanceMock);
-        $this->paymentMock->method('getAdditionalInformation')
-            ->with(AdyenPaymentMethodDataAssignObserver::BRAND_CODE)
-            ->willReturn('klarna');
 
         $this->configHelperMock->method('getConfigData')
             ->with('capture_for_openinvoice', BeforeShipmentObserver::XML_ADYEN_ABSTRACT_PREFIX, 1)
@@ -177,9 +171,6 @@ class BeforeShipmentObserverTest extends AbstractAdyenTestCase
 
         $this->paymentMock->method('getMethod')->willReturn($randomPaymentMethod);
         $this->paymentMock->method('getMethodInstance')->willReturn($paymentMethodInstanceMock);
-        $this->paymentMock->method('getAdditionalInformation')
-            ->with(AdyenPaymentMethodDataAssignObserver::BRAND_CODE)
-            ->willReturn('klarna');
 
         $this->paymentMethodsHelperMock->method('isAdyenPayment')->willReturn(true);
         $this->paymentMethodsHelperMock->method('isOpenInvoice')
@@ -216,9 +207,6 @@ class BeforeShipmentObserverTest extends AbstractAdyenTestCase
 
         $this->paymentMock->method('getMethod')->willReturn($randomPaymentMethod);
         $this->paymentMock->method('getMethodInstance')->willReturn($paymentMethodInstanceMock);
-        $this->paymentMock->method('getAdditionalInformation')
-            ->with(AdyenPaymentMethodDataAssignObserver::BRAND_CODE)
-            ->willReturn('klarna');
 
         $this->configHelperMock->method('getConfigData')
             ->with('capture_for_openinvoice', BeforeShipmentObserver::XML_ADYEN_ABSTRACT_PREFIX, 1)

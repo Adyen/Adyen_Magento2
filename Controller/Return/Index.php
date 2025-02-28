@@ -29,8 +29,6 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class Index extends Action
 {
-    const BRAND_CODE_DOTPAY = 'dotpay';
-    const RESULT_CODE_RECEIVED = 'Received';
     const DETAILS_ALLOWED_PARAM_KEYS = [
         'MD',
         'PaReq',
@@ -164,7 +162,6 @@ class Index extends Action
         if ($result) {
             $this->order = $order;
             $this->payment = $order->getPayment();
-            $this->cleanUpRedirectAction();
         }
 
         return $result;
@@ -188,24 +185,5 @@ class Index extends Action
         }
 
         return $order;
-    }
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    private function cleanUpRedirectAction(): void
-    {
-        // Prevent action component to redirect page again after returning to the shop
-        $paymentAction = $this->order->getPayment()->getAdditionalInformation('action');
-        $brandCode = $this->order->getPayment()->getAdditionalInformation('brand_code');
-        $resultCode = $this->order->getPayment()->getAdditionalInformation('resultCode');
-
-        if (($brandCode == self::BRAND_CODE_DOTPAY && $resultCode == self::RESULT_CODE_RECEIVED) ||
-            (isset($paymentAction) && $paymentAction['type'] === 'redirect')
-        ) {
-            $this->payment->unsAdditionalInformation('action');
-            $this->order->save();
-        }
     }
 }

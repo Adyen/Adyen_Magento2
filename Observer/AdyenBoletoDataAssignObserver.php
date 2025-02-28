@@ -52,9 +52,6 @@ class AdyenBoletoDataAssignObserver extends AbstractDataAssignObserver
         // Remove cc_type information from the previous payment
         $paymentInfo->unsAdditionalInformation('cc_type');
 
-        // Remove remaining brand_code information from the previous payment
-        $paymentInfo->unsAdditionalInformation('brand_code');
-
         if (!empty($additionalData[self::BOLETO_TYPE])) {
             $paymentInfo->setCcType($additionalData[self::BOLETO_TYPE]);
         } else {

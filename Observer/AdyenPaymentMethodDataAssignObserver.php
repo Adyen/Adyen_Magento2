@@ -23,7 +23,6 @@ use Magento\Quote\Api\Data\PaymentInterface;
 
 class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
 {
-    const BRAND_CODE = 'brand_code';
     const DF_VALUE = 'df_value';
     const GUEST_EMAIL = 'guestEmail';
     const STATE_DATA = 'stateData';
@@ -32,7 +31,6 @@ class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
     const CC_NUMBER = 'cc_number';
 
     private static $approvedAdditionalDataKeys = [
-        self::BRAND_CODE,
         self::DF_VALUE,
         self::GUEST_EMAIL,
         self::STATE_DATA,
@@ -47,6 +45,12 @@ class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
     private StateData $stateData;
     private Vault $vaultHelper;
 
+    /**
+     * @param CheckoutStateDataValidator $checkoutStateDataValidator
+     * @param Collection $stateDataCollection
+     * @param StateData $stateData
+     * @param Vault $vaultHelper
+     */
     public function __construct(
         CheckoutStateDataValidator $checkoutStateDataValidator,
         Collection $stateDataCollection,
@@ -59,7 +63,11 @@ class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
         $this->vaultHelper = $vaultHelper;
     }
 
-    public function execute(Observer $observer)
+    /**
+     * @param Observer $observer
+     * @return void
+     */
+    public function execute(Observer $observer): void
     {
         $additionalDataToSave = [];
         $stateData = null;
@@ -88,7 +96,6 @@ class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
         } elseif (!empty($additionalData[self::CC_NUMBER])) {
             //This block goes for multi shipping scenarios
             $stateData = json_decode((string) $additionalData[self::CC_NUMBER], true);
-            $paymentInfo->setAdditionalInformation(self::BRAND_CODE, $stateData['paymentMethod']['type']);
         } elseif($paymentInfo->getData('method') != 'adyen_giftcard') {
             $stateData = $this->stateDataCollection->getStateDataArrayWithQuoteId($paymentInfo->getData('quote_id'));
             if(!empty($stateData) && $stateData['paymentMethod']['type'] == 'giftcard')
@@ -118,6 +125,5 @@ class AdyenPaymentMethodDataAssignObserver extends AbstractDataAssignObserver
         foreach (array_merge($additionalData, $additionalDataToSave) as $key => $data) {
             $paymentInfo->setAdditionalInformation($key, $data);
         }
-
     }
 }

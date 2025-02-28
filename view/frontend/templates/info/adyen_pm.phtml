@@ -92,8 +92,6 @@
     <?php else: ?>
         <?php if ($_methodTitle = $_info->getAdditionalInformation('method_title')): ?>
             <dt class="title"><?= $block->escapeHtml($_methodTitle); ?></dt>
-        <?php elseif ($_brandCode = $_info->getAdditionalInformation('brand_code')): ?>
-            <dt class="title"><?= $block->escapeHtml($_brandCode); ?></dt>
         <?php else: ?>
             <dt class="title"><?= $block->escapeHtml($_info->getMethodInstance()->getTitle()) ?></dt>
         <?php endif; ?>

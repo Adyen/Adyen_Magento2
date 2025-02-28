@@ -76,13 +76,7 @@ class IndexTest extends AbstractAdyenTestCase
         $this->contextResponseMock = $this->createMock(ResponseInterface::class);
         $this->quoteMock = $this->createMock(\Magento\Quote\Model\Quote::class);
         $this->paymentEntityMock = $this->createMock(Payment::class);
-        $this->paymentEntityMock->method('getAdditionalInformation')->will(
-            $this->returnValueMap([
-                ['action', ['type' => 'redirect']],
-                ['brand_code', Index::BRAND_CODE_DOTPAY],
-                ['resultCode', Index::RESULT_CODE_RECEIVED]
-            ])
-        );
+
         $this->orderEntityMock = $this->createMock(Order::class);
         $this->orderEntityMock->method('getPayment')->willReturn($this->paymentEntityMock);
         $this->controllerRequestMock = $this->createMock(RequestInterface::class);

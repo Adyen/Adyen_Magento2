@@ -97,9 +97,6 @@ class AdyenCcDataAssignObserver extends AbstractDataAssignObserver
         $data = $this->readDataArgument($observer);
         $paymentInfo = $this->readPaymentModelArgument($observer);
 
-        // Remove remaining brand_code information from the previous payment
-        $paymentInfo->unsAdditionalInformation('brand_code');
-
         // Remove cc_type information from the previous payment
         $paymentInfo->unsAdditionalInformation('cc_type');
 

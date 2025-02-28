@@ -57,7 +57,6 @@ class AdyenPaymentMethodDataAssignObserverTest extends AbstractAdyenTestCase
     public function testExecuteWithValidAdditionalData()
     {
         $additionalData = [
-            'brand_code' => 'visa',
             'stateData' => json_encode(['paymentMethod' => ['type' => 'scheme']]),
             'recurringProcessingModel' => 'Subscription',
         ];
@@ -83,7 +82,7 @@ class AdyenPaymentMethodDataAssignObserverTest extends AbstractAdyenTestCase
             ->with('Subscription')
             ->willReturn(true);
 
-        $this->paymentInfo->expects($this->exactly(2))->method('setAdditionalInformation');
+        $this->paymentInfo->expects($this->once())->method('setAdditionalInformation');
 
         // Execute the observer logic
         $this->observer->execute($observer);
@@ -92,7 +91,6 @@ class AdyenPaymentMethodDataAssignObserverTest extends AbstractAdyenTestCase
     public function testExecuteWithInvalidRecurringProcessingModel()
     {
         $additionalData = [
-            'brand_code' => 'visa',
             'stateData' => json_encode(['paymentMethod' => ['type' => 'scheme']]),
             'recurringProcessingModel' => 'invalid',
         ];

@@ -304,13 +304,14 @@ define(
             placeOrder: async function(stateData, actions) {
                 let self = this;
 
-                let additionalData = {};
+                let additionalData = {
+                    frontendType: 'default'
+                };
 
                 if (!!stateData.data) {
-                    additionalData.brand_code = stateData.data.paymentMethod.brand;
                     additionalData.stateData = JSON.stringify(stateData.data);
                 }
-                additionalData.frontendType = 'default';
+
                 let data = {
                     'method': this.item.method,
                     'additional_data': additionalData

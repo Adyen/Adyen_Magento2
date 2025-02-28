@@ -171,7 +171,6 @@ input AdyenAdditionalDataCc {
 }
 
 input AdyenAdditionalData {
-    brand_code: String! @doc(description:"Type of alternative payment method.")
     stateData: String! @doc(description:"JSON string of filled fields.")
     df_value: String @doc(description: "Ratepay device identification token.")
     guestEmail: String @doc(description: "Email address if customer is guest.")

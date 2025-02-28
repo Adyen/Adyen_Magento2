@@ -93,7 +93,6 @@ QUERY;
         $adyenAdditionalData = '
         ,
         adyen_additional_data: {
-            brand_code: "ideal",
             stateData: "' . $stateData . '",
             returnUrl: "http://localhost/checkout/?id=:merchantReference&done=1"
         }';
@@ -140,7 +139,6 @@ QUERY;
         $adyenAdditionalData = '
         ,
         adyen_additional_data: {
-            brand_code: "ideal",
             stateData: "' . $stateData . '"
         }';
         $query = $this->getQuery($maskedQuoteId, $methodCode, $adyenAdditionalData);
